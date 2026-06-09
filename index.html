@@ -81,6 +81,15 @@ input[type="text"]:focus { border-color: #c9a227; }
 .score-round { font-size: 11px; color: #5a7a96; font-weight: 600; margin-bottom: 4px; }
 .score-pts { font-size: 20px; font-weight: 800; color: #c9a227; }
 .score-note { font-size: 10px; color: #3a5a76; margin-top: 2px; }
+.timeline { display: flex; flex-direction: column; gap: 2px; }
+.tl-row { display: flex; align-items: center; gap: 12px; padding: 12px 10px; border-radius: 8px; border-left: 3px solid #1a3350; background: #091e36; margin-bottom: 6px; }
+.tl-final { border-left-color: #c9a227; background: #0c1e10; }
+.tl-date { font-size: 11px; color: #5a7a96; font-weight: 600; min-width: 90px; }
+.tl-info { flex: 1; }
+.tl-label { font-size: 14px; font-weight: 700; color: #e8edf2; }
+.tl-final .tl-label { color: #c9a227; }
+.tl-sub { font-size: 11px; color: #3a5a76; margin-top: 2px; }
+.tl-pts { font-size: 13px; font-weight: 800; color: #c9a227; white-space: nowrap; }
 
 /* Thank you screen */
 #thankYou {
@@ -110,7 +119,35 @@ input[type="text"]:focus { border-color: #c9a227; }
 <nav style="background:#0b1d2e;border-bottom:1px solid #1a3350;display:flex;">
   <button class="tab-btn active" onclick="showTab('picks',this)">📋 Make Picks</button>
   <button class="tab-btn" onclick="showTab('leaderboard',this)">🏆 Leaderboard</button>
+  <button class="tab-btn" onclick="showTab('schedule',this)">📅 Schedule & Rules</button>
 </nav>
+
+<div id="scheduleSection" style="display:none;">
+  <div class="container">
+    <div class="card">
+      <div class="card-title">📅 Tournament Schedule</div>
+      <div class="timeline">
+        <div class="tl-row"><div class="tl-date">Jun 11 – Jul 2</div><div class="tl-info"><div class="tl-label">Group Stage</div><div class="tl-sub">48 teams · 12 groups · Submit picks before Jun 11</div></div><div class="tl-pts">1 pt</div></div>
+        <div class="tl-row"><div class="tl-date">Jul 4 – Jul 7</div><div class="tl-info"><div class="tl-label">Round of 32</div><div class="tl-sub">32 teams · 16 matches</div></div><div class="tl-pts">2 pts</div></div>
+        <div class="tl-row"><div class="tl-date">Jul 9 – Jul 12</div><div class="tl-info"><div class="tl-label">Round of 16</div><div class="tl-sub">16 teams · 8 matches</div></div><div class="tl-pts">4 pts</div></div>
+        <div class="tl-row"><div class="tl-date">Jul 14 – Jul 15</div><div class="tl-info"><div class="tl-label">Quarterfinals</div><div class="tl-sub">8 teams · 4 matches</div></div><div class="tl-pts">8 pts</div></div>
+        <div class="tl-row"><div class="tl-date">Jul 18 – Jul 19</div><div class="tl-info"><div class="tl-label">Semifinals</div><div class="tl-sub">4 teams · 2 matches</div></div><div class="tl-pts">16 pts</div></div>
+        <div class="tl-row tl-final"><div class="tl-date">Jul 19</div><div class="tl-info"><div class="tl-label">Championship Final</div><div class="tl-sub">MetLife Stadium · New Jersey</div></div><div class="tl-pts">32 pts</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 Scoring Rules</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">
+        <div class="score-rule"><div class="score-round">Group Stage</div><div class="score-pts">1 pt</div><div class="score-note">per correct pick</div></div>
+        <div class="score-rule"><div class="score-round">Round of 32</div><div class="score-pts">2 pts</div><div class="score-note">per correct pick</div></div>
+        <div class="score-rule"><div class="score-round">Round of 16</div><div class="score-pts">4 pts</div><div class="score-note">per correct pick</div></div>
+        <div class="score-rule"><div class="score-round">Quarterfinals</div><div class="score-pts">8 pts</div><div class="score-note">per correct pick</div></div>
+        <div class="score-rule"><div class="score-round">Semifinals</div><div class="score-pts">16 pts</div><div class="score-note">per correct pick</div></div>
+        <div class="score-rule"><div class="score-round">Championship</div><div class="score-pts">32 pts</div><div class="score-note">per correct pick</div></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="leaderboardSection" style="display:none;">
   <div class="container">
@@ -140,18 +177,6 @@ input[type="text"]:focus { border-color: #c9a227; }
   </header>
 
   <div class="container">
-
-    <div class="card">
-      <div class="card-title">📊 Scoring Rules</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">
-        <div class="score-rule"><div class="score-round">Group Stage</div><div class="score-pts">1 pt</div><div class="score-note">per correct pick</div></div>
-        <div class="score-rule"><div class="score-round">Round of 32</div><div class="score-pts">2 pts</div><div class="score-note">per correct pick</div></div>
-        <div class="score-rule"><div class="score-round">Round of 16</div><div class="score-pts">4 pts</div><div class="score-note">per correct pick</div></div>
-        <div class="score-rule"><div class="score-round">Quarterfinals</div><div class="score-pts">8 pts</div><div class="score-note">per correct pick</div></div>
-        <div class="score-rule"><div class="score-round">Semifinals</div><div class="score-pts">16 pts</div><div class="score-note">per correct pick</div></div>
-        <div class="score-rule"><div class="score-round">Championship</div><div class="score-pts">32 pts</div><div class="score-note">per correct pick</div></div>
-      </div>
-    </div>
 
     <div class="card">
       <div class="card-title">👤 Your Name</div>
@@ -321,12 +346,12 @@ function showThankYou(name, p) {
 function showTab(tab, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  const isLeaderboard = tab === 'leaderboard';
-  document.getElementById('leaderboardSection').style.display = isLeaderboard ? '' : 'none';
   const inThankYou = document.getElementById('thankYou').style.display !== 'none';
-  document.getElementById('thankYou').style.display = (!isLeaderboard && inThankYou) ? '' : (isLeaderboard ? 'none' : (inThankYou ? '' : 'none'));
-  document.getElementById('formWrap').style.display = (!isLeaderboard && !inThankYou) ? '' : 'none';
-  if (isLeaderboard) loadLeaderboard();
+  document.getElementById('leaderboardSection').style.display = tab === 'leaderboard' ? '' : 'none';
+  document.getElementById('scheduleSection').style.display = tab === 'schedule' ? '' : 'none';
+  document.getElementById('thankYou').style.display = tab === 'picks' && inThankYou ? '' : 'none';
+  document.getElementById('formWrap').style.display = tab === 'picks' && !inThankYou ? '' : 'none';
+  if (tab === 'leaderboard') loadLeaderboard();
 }
 
 async function loadLeaderboard() {
