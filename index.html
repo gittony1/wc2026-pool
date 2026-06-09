@@ -66,6 +66,17 @@ input[type="text"]:focus { border-color: #c9a227; }
 .btn-submit:hover:not(:disabled) { background: #dab83a; }
 .btn-submit:disabled { opacity: 0.35; cursor: not-allowed; }
 #submitError { color: #f07070; font-size: 13px; margin-top: 10px; text-align: center; }
+.tab-btn { padding: 12px 20px; background: none; border: none; border-bottom: 3px solid transparent; color: #5a7a96; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.tab-btn:hover { color: #c8d8e8; }
+.tab-btn.active { color: #c9a227; border-bottom-color: #c9a227; }
+.ldr-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #0d2236; font-size: 13px; }
+.ldr-row:last-child { border-bottom: none; }
+.ldr-rank { width: 28px; height: 28px; border-radius: 50%; background: #0d2236; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; margin-right: 10px; }
+.ldr-rank.gold { background: #c9a227; color: #07111f; }
+.ldr-rank.silver { background: #9aa0a8; color: #07111f; }
+.ldr-rank.bronze { background: #b07030; color: #fff; }
+.ldr-pts { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #0d2236; color: #5a7a96; }
+.ldr-empty { text-align: center; padding: 24px; color: #5a7a96; font-size: 13px; }
 
 /* Thank you screen */
 #thankYou {
@@ -91,6 +102,20 @@ input[type="text"]:focus { border-color: #c9a227; }
 </style>
 </head>
 <body>
+
+<nav style="background:#0b1d2e;border-bottom:1px solid #1a3350;display:flex;">
+  <button class="tab-btn active" onclick="showTab('picks',this)">📋 Make Picks</button>
+  <button class="tab-btn" onclick="showTab('leaderboard',this)">🏆 Leaderboard</button>
+</nav>
+
+<div id="leaderboardSection" style="display:none;">
+  <div class="container">
+    <div class="card">
+      <div class="card-title">🏆 Who's Playing</div>
+      <div id="leaderboardBody"><div class="ldr-empty">Loading…</div></div>
+    </div>
+  </div>
+</div>
 
 <div id="thankYou">
   <div class="big">🏆</div>
@@ -275,6 +300,41 @@ function showThankYou(name, p) {
     }
   }
   document.getElementById('tyPicks').innerHTML = html;
+}
+
+function showTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const isLeaderboard = tab === 'leaderboard';
+  document.getElementById('leaderboardSection').style.display = isLeaderboard ? '' : 'none';
+  const inThankYou = document.getElementById('thankYou').style.display !== 'none';
+  document.getElementById('thankYou').style.display = (!isLeaderboard && inThankYou) ? '' : (isLeaderboard ? 'none' : (inThankYou ? '' : 'none'));
+  document.getElementById('formWrap').style.display = (!isLeaderboard && !inThankYou) ? '' : 'none';
+  if (isLeaderboard) loadLeaderboard();
+}
+
+async function loadLeaderboard() {
+  const el = document.getElementById('leaderboardBody');
+  try {
+    const res = await fetch(SCRIPT_URL);
+    const participants = await res.json();
+    if (!participants.length) {
+      el.innerHTML = '<div class="ldr-empty">No submissions yet. Be the first!</div>';
+      return;
+    }
+    const rankClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    el.innerHTML = `<div style="color:#5a7a96;font-size:12px;margin-bottom:12px;">${participants.length} player${participants.length!==1?'s':''} in the pool</div>` +
+      participants.map((p, i) => `
+        <div class="ldr-row">
+          <div style="display:flex;align-items:center;">
+            <span class="ldr-rank ${rankClass(i)}">${i+1}</span>
+            <strong>${p.name}</strong>
+          </div>
+          <span class="ldr-pts">— pts</span>
+        </div>`).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="ldr-empty">Could not load leaderboard.</div>';
+  }
 }
 
 function startOver() {
