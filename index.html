@@ -155,6 +155,16 @@ table.standings tr:hover td { background: #0b2035; }
       <div id="joinError" style="color:#f07070;font-size:12px;margin-top:6px;"></div>
     </div>
   </div>
+  <div id="pinPrompt" style="display:none;max-width:300px;">
+    <div class="card">
+      <div class="card-title">🔒 Enter your PIN</div>
+      <input type="password" id="pinInput" placeholder="Your PIN" maxlength="6"
+             style="margin-bottom:10px;" onkeydown="if(event.key==='Enter')verifyPin()" />
+      <button class="btn btn-gold" onclick="verifyPin()">Unlock My Picks</button>
+      <div id="pinError" style="color:#f07070;font-size:12px;margin-top:8px;"></div>
+    </div>
+  </div>
+
   <div id="picksMain" style="display:none;">
     <div class="subtabs" id="pickTabs">
       <div class="subtab active" data-tab="group" onclick="showPickTab('group',this)">Group Stage</div>
@@ -541,23 +551,28 @@ function resetAll(){
 function renderPicksSection(){ refreshPickSelect(); }
 
 function joinPool(){
-  const el = document.getElementById('joinName');
-  const err = document.getElementById('joinError');
-  const name = el.value.trim();
-  err.textContent = '';
-  if(!name) return;
+  const el=document.getElementById('joinName');
+  const err=document.getElementById('joinError');
+  const name=el.value.trim();
+  err.textContent='';
+  if(!name)return;
   if(ST.participants.find(p=>p.name.toLowerCase()===name.toLowerCase())){
-    err.textContent = 'That name is already taken — select it from the dropdown above.';
+    err.textContent='That name is already taken — select it from the dropdown above.';
     return;
   }
-  const id = 'p' + Date.now();
-  ST.participants.push({id, name});
-  ST.picks[id] = {group:[], ko:{}};
+  const pin=prompt('Set a PIN to protect your picks (you\'ll need this to log back in):');
+  if(pin===null)return;
+  if(!pin.trim()){err.textContent='PIN cannot be empty.';return;}
+  const pin2=prompt('Confirm your PIN:');
+  if(pin!==pin2){err.textContent='PINs did not match. Try again.';return;}
+  const id='p'+Date.now();
+  ST.participants.push({id,name,pin});
+  ST.picks[id]={group:[],ko:{}};
   save();
-  el.value = '';
+  el.value='';
   refreshPickSelect();
-  document.getElementById('pickUser').value = id;
-  onPickUserChange();
+  document.getElementById('pickUser').value=id;
+  showPicksForUser(id);
 }
 
 function refreshPickSelect(){
@@ -570,11 +585,36 @@ function refreshPickSelect(){
 
 function onPickUserChange(){
   const uid=document.getElementById('pickUser').value;
-  document.getElementById('picksMain').style.display=uid?'block':'none';
+  document.getElementById('picksMain').style.display='none';
+  document.getElementById('pinPrompt').style.display='none';
   document.getElementById('headerUser').textContent=uid
     ? '👤 '+ST.participants.find(p=>p.id===uid)?.name
     : '—';
   if(!uid)return;
+  const participant=ST.participants.find(p=>p.id===uid);
+  if(participant?.pin){
+    document.getElementById('pinPrompt').style.display='';
+    document.getElementById('pinInput').value='';
+    document.getElementById('pinError').textContent='';
+    setTimeout(()=>document.getElementById('pinInput').focus(),50);
+  } else {
+    showPicksForUser(uid);
+  }
+}
+
+function verifyPin(){
+  const uid=document.getElementById('pickUser').value;
+  const entered=document.getElementById('pinInput').value;
+  const err=document.getElementById('pinError');
+  const participant=ST.participants.find(p=>p.id===uid);
+  if(!participant)return;
+  if(entered!==participant.pin){err.textContent='Wrong PIN. Try again.';return;}
+  document.getElementById('pinPrompt').style.display='none';
+  showPicksForUser(uid);
+}
+
+function showPicksForUser(uid){
+  document.getElementById('picksMain').style.display='block';
   if(!ST.picks[uid]) ST.picks[uid]={group:[],ko:{}};
   refreshPickTabs();
   showPickTab('group', document.querySelector('#pickTabs [data-tab="group"]'));
