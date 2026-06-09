@@ -146,6 +146,14 @@ table.standings tr:hover td { background: #0b2035; }
     <select id="pickUser" onchange="onPickUserChange()" style="max-width:280px;">
       <option value="">— Select your name —</option>
     </select>
+    <div style="margin-top:10px;">
+      <div class="muted" style="font-size:12px;margin-bottom:6px;">Not on the list? Add yourself:</div>
+      <div class="flex gap-2">
+        <input type="text" id="joinName" placeholder="Your name" style="max-width:220px;" onkeydown="if(event.key==='Enter')joinPool()" />
+        <button class="btn btn-gold btn-sm" onclick="joinPool()">Join Pool</button>
+      </div>
+      <div id="joinError" style="color:#f07070;font-size:12px;margin-top:6px;"></div>
+    </div>
   </div>
   <div id="picksMain" style="display:none;">
     <div class="subtabs" id="pickTabs">
@@ -531,6 +539,26 @@ function resetAll(){
 //  PICKS
 // ══════════════════════════════════════
 function renderPicksSection(){ refreshPickSelect(); }
+
+function joinPool(){
+  const el = document.getElementById('joinName');
+  const err = document.getElementById('joinError');
+  const name = el.value.trim();
+  err.textContent = '';
+  if(!name) return;
+  if(ST.participants.find(p=>p.name.toLowerCase()===name.toLowerCase())){
+    err.textContent = 'That name is already taken — select it from the dropdown above.';
+    return;
+  }
+  const id = 'p' + Date.now();
+  ST.participants.push({id, name});
+  ST.picks[id] = {group:[], ko:{}};
+  save();
+  el.value = '';
+  refreshPickSelect();
+  document.getElementById('pickUser').value = id;
+  onPickUserChange();
+}
 
 function refreshPickSelect(){
   const sel=document.getElementById('pickUser');
