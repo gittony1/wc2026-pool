@@ -77,6 +77,10 @@ input[type="text"]:focus { border-color: #c9a227; }
 .ldr-rank.bronze { background: #b07030; color: #fff; }
 .ldr-pts { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #0d2236; color: #5a7a96; }
 .ldr-empty { text-align: center; padding: 24px; color: #5a7a96; font-size: 13px; }
+.score-rule { background: #091e36; border: 1px solid #1a3350; border-radius: 8px; padding: 10px 12px; text-align: center; }
+.score-round { font-size: 11px; color: #5a7a96; font-weight: 600; margin-bottom: 4px; }
+.score-pts { font-size: 20px; font-weight: 800; color: #c9a227; }
+.score-note { font-size: 10px; color: #3a5a76; margin-top: 2px; }
 
 /* Thank you screen */
 #thankYou {
@@ -136,6 +140,18 @@ input[type="text"]:focus { border-color: #c9a227; }
   </header>
 
   <div class="container">
+
+    <div class="card">
+      <div class="card-title">📊 Scoring Rules</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">
+        <div class="score-rule"><div class="score-round">Group Stage</div><div class="score-pts">1 pt</div><div class="score-note">per correct pick</div></div>
+        <div class="score-rule"><div class="score-round">Round of 32</div><div class="score-pts">2 pts</div><div class="score-note">per correct pick</div></div>
+        <div class="score-rule"><div class="score-round">Round of 16</div><div class="score-pts">4 pts</div><div class="score-note">per correct pick</div></div>
+        <div class="score-rule"><div class="score-round">Quarterfinals</div><div class="score-pts">8 pts</div><div class="score-note">per correct pick</div></div>
+        <div class="score-rule"><div class="score-round">Semifinals</div><div class="score-pts">16 pts</div><div class="score-note">per correct pick</div></div>
+        <div class="score-rule"><div class="score-round">Championship</div><div class="score-pts">32 pts</div><div class="score-note">per correct pick</div></div>
+      </div>
+    </div>
 
     <div class="card">
       <div class="card-title">👤 Your Name</div>
