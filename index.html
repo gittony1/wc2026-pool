@@ -89,7 +89,8 @@ input[type="text"]:focus { border-color: #c9a227; }
 .tl-label { font-size: 14px; font-weight: 700; color: #e8edf2; }
 .tl-final .tl-label { color: #c9a227; }
 .tl-sub { font-size: 11px; color: #3a5a76; margin-top: 2px; }
-.tl-pts { font-size: 13px; font-weight: 800; color: #c9a227; white-space: nowrap; }
+.tl-pts { font-size: 13px; font-weight: 800; color: #c9a227; white-space: nowrap; text-align: right; }
+.tl-pts span { display: block; font-size: 10px; font-weight: 400; color: #3a5a76; }
 
 /* Thank you screen */
 #thankYou {
@@ -127,23 +128,12 @@ input[type="text"]:focus { border-color: #c9a227; }
     <div class="card">
       <div class="card-title">📅 Tournament Schedule</div>
       <div class="timeline">
-        <div class="tl-row"><div class="tl-date">Jun 11 – Jul 2</div><div class="tl-info"><div class="tl-label">Group Stage</div><div class="tl-sub">48 teams · 12 groups · Submit picks before Jun 11</div></div><div class="tl-pts">1 pt</div></div>
-        <div class="tl-row"><div class="tl-date">Jul 4 – Jul 7</div><div class="tl-info"><div class="tl-label">Round of 32</div><div class="tl-sub">32 teams · 16 matches</div></div><div class="tl-pts">2 pts</div></div>
-        <div class="tl-row"><div class="tl-date">Jul 9 – Jul 12</div><div class="tl-info"><div class="tl-label">Round of 16</div><div class="tl-sub">16 teams · 8 matches</div></div><div class="tl-pts">4 pts</div></div>
-        <div class="tl-row"><div class="tl-date">Jul 14 – Jul 15</div><div class="tl-info"><div class="tl-label">Quarterfinals</div><div class="tl-sub">8 teams · 4 matches</div></div><div class="tl-pts">8 pts</div></div>
-        <div class="tl-row"><div class="tl-date">Jul 18 – Jul 19</div><div class="tl-info"><div class="tl-label">Semifinals</div><div class="tl-sub">4 teams · 2 matches</div></div><div class="tl-pts">16 pts</div></div>
-        <div class="tl-row tl-final"><div class="tl-date">Jul 19</div><div class="tl-info"><div class="tl-label">Championship Final</div><div class="tl-sub">MetLife Stadium · New Jersey</div></div><div class="tl-pts">32 pts</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">📊 Scoring Rules</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;">
-        <div class="score-rule"><div class="score-round">Group Stage</div><div class="score-pts">1 pt</div><div class="score-note">per correct pick</div></div>
-        <div class="score-rule"><div class="score-round">Round of 32</div><div class="score-pts">2 pts</div><div class="score-note">per correct pick</div></div>
-        <div class="score-rule"><div class="score-round">Round of 16</div><div class="score-pts">4 pts</div><div class="score-note">per correct pick</div></div>
-        <div class="score-rule"><div class="score-round">Quarterfinals</div><div class="score-pts">8 pts</div><div class="score-note">per correct pick</div></div>
-        <div class="score-rule"><div class="score-round">Semifinals</div><div class="score-pts">16 pts</div><div class="score-note">per correct pick</div></div>
-        <div class="score-rule"><div class="score-round">Championship</div><div class="score-pts">32 pts</div><div class="score-note">per correct pick</div></div>
+        <div class="tl-row"><div class="tl-date">Jun 11 – Jul 2</div><div class="tl-info"><div class="tl-label">Group Stage</div><div class="tl-sub">48 teams · 12 groups · Submit picks before Jun 11</div></div><div class="tl-pts">1 pt<span>per correct pick</span></div></div>
+        <div class="tl-row"><div class="tl-date">Jul 4 – Jul 7</div><div class="tl-info"><div class="tl-label">Round of 32</div><div class="tl-sub">32 teams · 16 matches</div></div><div class="tl-pts">2 pts<span>per correct pick</span></div></div>
+        <div class="tl-row"><div class="tl-date">Jul 9 – Jul 12</div><div class="tl-info"><div class="tl-label">Round of 16</div><div class="tl-sub">16 teams · 8 matches</div></div><div class="tl-pts">4 pts<span>per correct pick</span></div></div>
+        <div class="tl-row"><div class="tl-date">Jul 14 – Jul 15</div><div class="tl-info"><div class="tl-label">Quarterfinals</div><div class="tl-sub">8 teams · 4 matches</div></div><div class="tl-pts">8 pts<span>per correct pick</span></div></div>
+        <div class="tl-row"><div class="tl-date">Jul 18 – Jul 19</div><div class="tl-info"><div class="tl-label">Semifinals</div><div class="tl-sub">4 teams · 2 matches</div></div><div class="tl-pts">16 pts<span>per correct pick</span></div></div>
+        <div class="tl-row tl-final"><div class="tl-date">Jul 19</div><div class="tl-info"><div class="tl-label">Championship Final</div><div class="tl-sub">MetLife Stadium · New Jersey</div></div><div class="tl-pts">32 pts<span>per correct pick</span></div></div>
       </div>
     </div>
   </div>
