@@ -229,6 +229,9 @@ table.std-table td:first-child { text-align: left; display: flex; align-items: c
       <div class="group-grid" id="groupGrid"></div>
     </div>
 
+    <div id="deadlinePassed" style="display:none;background:#2a0f0f;border:1px solid #5a1010;color:#f07070;padding:12px 14px;border-radius:8px;font-size:13px;text-align:center;margin-bottom:10px;">
+      ⏱️ The group stage picks deadline (Thursday June 11 EOD) has passed. Submissions are closed.
+    </div>
     <button class="btn-submit" id="submitBtn" disabled onclick="submitPicks()">
       Submit My Picks →
     </button>
@@ -322,7 +325,15 @@ function toggle(team) {
   renderGrid();
 }
 
+const PICKS_DEADLINE = new Date('2026-06-12T00:00:00');
+
 function updateSubmit() {
+  if (new Date() >= PICKS_DEADLINE) {
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('deadlinePassed').style.display = '';
+    return;
+  }
   const name = document.getElementById('nameInput').value.trim();
   document.getElementById('submitBtn').disabled = !(name && totalPicked() === 32);
 }
@@ -422,6 +433,8 @@ async function loadStandings() {
   }
 }
 
+const GROUP_LETTERS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+
 async function loadLeaderboard() {
   const el = document.getElementById('leaderboardBody');
   try {
@@ -431,16 +444,19 @@ async function loadLeaderboard() {
       el.innerHTML = '<div class="ldr-empty">No submissions yet. Be the first!</div>';
       return;
     }
-    const rankClass = i => i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-    el.innerHTML = `<div style="color:#5a7a96;font-size:12px;margin-bottom:12px;">${participants.length} player${participants.length!==1?'s':''} in the pool</div>` +
-      participants.map((p, i) => `
-        <div class="ldr-row">
-          <div style="display:flex;align-items:center;">
-            <span class="ldr-rank ${rankClass(i)}">${i+1}</span>
-            <strong>${p.name}</strong>
-          </div>
-          <span class="ldr-pts">— pts</span>
-        </div>`).join('');
+    let html = `<div style="color:#5a7a96;font-size:12px;margin-bottom:12px;">${participants.length} player${participants.length!==1?'s':''} in the pool</div>`;
+    html += `<div style="overflow-x:auto;"><table class="std-table" style="min-width:1100px;">
+      <thead><tr><th style="text-align:left;">Name</th>${GROUP_LETTERS.map(g=>`<th>Group ${g}</th>`).join('')}</tr></thead><tbody>`;
+    for (const p of participants) {
+      html += `<tr><td style="text-align:left;white-space:nowrap;"><strong>${p.name}</strong></td>`;
+      for (const g of GROUP_LETTERS) {
+        const picks = (p[g] || '').split(',').map(t => t.trim()).filter(t => t);
+        html += `<td style="white-space:nowrap;font-size:11px;">${picks.join('<br>')}</td>`;
+      }
+      html += `</tr>`;
+    }
+    html += `</tbody></table></div>`;
+    el.innerHTML = html;
   } catch(e) {
     el.innerHTML = '<div class="ldr-empty">Could not load leaderboard.</div>';
   }
