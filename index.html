@@ -91,6 +91,23 @@ input[type="text"]:focus { border-color: #c9a227; }
 .tl-sub { font-size: 11px; color: #3a5a76; margin-top: 2px; }
 .tl-pts { font-size: 13px; font-weight: 800; color: #c9a227; white-space: nowrap; text-align: right; }
 .tl-pts span { display: block; font-size: 10px; font-weight: 400; color: #3a5a76; }
+.std-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.std-group { background: #091e36; border: 1px solid #1a3350; border-radius: 8px; padding: 12px; }
+.std-group-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #5a7a96; margin-bottom: 8px; }
+table.std-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.std-table th { text-align: center; color: #3a5a76; font-size: 10px; font-weight: 700; padding: 3px 2px; }
+table.std-table th:first-child { text-align: left; }
+table.std-table td { padding: 4px 2px; text-align: center; border-top: 1px solid #0d2236; }
+table.std-table td:first-child { text-align: left; display: flex; align-items: center; gap: 6px; }
+.std-team-logo { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
+.std-team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+.std-row-advance td:first-child { border-left: 2px solid #27a14a; padding-left: 6px; }
+.std-row-bubble td:first-child { border-left: 2px solid #c9a227; padding-left: 6px; }
+.std-row-out td:first-child { border-left: 2px solid #3a5a76; padding-left: 6px; opacity: 0.55; }
+.std-pts { font-weight: 800; color: #c9a227; }
+.std-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-size: 11px; color: #5a7a96; }
+.std-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.std-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 
 /* Thank you screen */
 #thankYou {
@@ -121,6 +138,7 @@ input[type="text"]:focus { border-color: #c9a227; }
   <button class="tab-btn active" onclick="showTab('picks',this)">📋 Make Picks</button>
   <button class="tab-btn" onclick="showTab('leaderboard',this)">🏆 Leaderboard</button>
   <button class="tab-btn" onclick="showTab('schedule',this)">📅 Schedule & Rules</button>
+  <button class="tab-btn" onclick="showTab('standings',this)">⚽ Group Standings</button>
 </nav>
 
 <div id="scheduleSection" style="display:none;">
@@ -135,6 +153,16 @@ input[type="text"]:focus { border-color: #c9a227; }
         <div class="tl-row"><div class="tl-date">Jul 14 – Jul 15</div><div class="tl-info"><div class="tl-label">Semifinals</div><div class="tl-sub">4 teams · 2 matches</div></div><div class="tl-pts">16 pts<span>per correct pick</span></div></div>
         <div class="tl-row tl-final"><div class="tl-date">Jul 19</div><div class="tl-info"><div class="tl-label">Championship Final</div><div class="tl-sub">MetLife Stadium · New Jersey</div></div><div class="tl-pts">32 pts<span>per correct pick</span></div></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<div id="standingsSection" style="display:none;">
+  <div class="container">
+    <div class="card">
+      <div class="card-title">⚽ Live Group Standings</div>
+      <div class="muted" style="font-size:12px;margin-bottom:14px;">Pulled live from ESPN · updates automatically</div>
+      <div id="standingsBody"><div class="ldr-empty">Loading…</div></div>
     </div>
   </div>
 </div>
@@ -346,9 +374,52 @@ function showTab(tab, btn) {
   const inThankYou = document.getElementById('thankYou').style.display !== 'none';
   document.getElementById('leaderboardSection').style.display = tab === 'leaderboard' ? '' : 'none';
   document.getElementById('scheduleSection').style.display = tab === 'schedule' ? '' : 'none';
+  document.getElementById('standingsSection').style.display = tab === 'standings' ? '' : 'none';
   document.getElementById('thankYou').style.display = tab === 'picks' && inThankYou ? '' : 'none';
   document.getElementById('formWrap').style.display = tab === 'picks' && !inThankYou ? '' : 'none';
   if (tab === 'leaderboard') loadLeaderboard();
+  if (tab === 'standings') loadStandings();
+}
+
+const ESPN_STANDINGS_URL = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
+
+async function loadStandings() {
+  const el = document.getElementById('standingsBody');
+  try {
+    const res = await fetch(ESPN_STANDINGS_URL);
+    const data = await res.json();
+    const groups = data.children || [];
+    if (!groups.length) { el.innerHTML = '<div class="ldr-empty">Standings not available yet.</div>'; return; }
+
+    let html = '<div class="std-grid">';
+    for (const g of groups) {
+      const entries = (g.standings?.entries || []).slice().sort((a, b) => (a.note?.rank ?? 99) - (b.note?.rank ?? 99));
+      html += `<div class="std-group"><div class="std-group-label">${g.name}</div>
+        <table class="std-table">
+          <thead><tr><th>Team</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead>
+          <tbody>`;
+      for (const e of entries) {
+        const stats = {};
+        (e.stats || []).forEach(s => stats[s.name] = s.displayValue);
+        const desc = (e.note?.description || '').toLowerCase();
+        const rowCls = desc.includes('eliminated') ? 'std-row-out' : desc.includes('best 8') ? 'std-row-bubble' : desc.includes('advance') ? 'std-row-advance' : '';
+        const logo = e.team?.logos?.[0]?.href || '';
+        html += `<tr class="${rowCls}">
+          <td>${logo ? `<img class="std-team-logo" src="${logo}">` : ''}<span class="std-team-name">${e.team.displayName}</span></td>
+          <td>${stats.wins ?? '-'}</td><td>${stats.ties ?? '-'}</td><td>${stats.losses ?? '-'}</td>
+          <td>${stats.pointDifferential ?? '-'}</td><td class="std-pts">${stats.points ?? '-'}</td>
+        </tr>`;
+      }
+      html += `</tbody></table></div>`;
+    }
+    html += '</div><div class="std-legend">' +
+      '<span><i style="background:#27a14a;"></i> Advancing to Round of 32</span>' +
+      '<span><i style="background:#c9a227;"></i> In contention (best 3rd place)</span>' +
+      '<span><i style="background:#3a5a76;"></i> Eliminated</span></div>';
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="ldr-empty">Could not load live standings. Try again later.</div>';
+  }
 }
 
 async function loadLeaderboard() {
