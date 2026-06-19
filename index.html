@@ -101,13 +101,7 @@ table.std-table td { padding: 4px 2px; text-align: center; border-top: 1px solid
 table.std-table td:first-child { text-align: left; display: flex; align-items: center; gap: 6px; }
 .std-team-logo { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
 .std-team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
-.std-row-advance td:first-child { border-left: 2px solid #27a14a; padding-left: 6px; }
-.std-row-bubble td:first-child { border-left: 2px solid #c9a227; padding-left: 6px; }
-.std-row-out td:first-child { border-left: 2px solid #3a5a76; padding-left: 6px; opacity: 0.55; }
 .std-pts { font-weight: 800; color: #c9a227; }
-.std-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-size: 11px; color: #5a7a96; }
-.std-legend span { display: inline-flex; align-items: center; gap: 5px; }
-.std-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 
 /* Thank you screen */
 #thankYou {
@@ -412,10 +406,8 @@ async function loadStandings() {
       for (const e of entries) {
         const stats = {};
         (e.stats || []).forEach(s => stats[s.name] = s.displayValue);
-        const desc = (e.note?.description || '').toLowerCase();
-        const rowCls = desc.includes('eliminated') ? 'std-row-out' : desc.includes('best 8') ? 'std-row-bubble' : desc.includes('advance') ? 'std-row-advance' : '';
         const logo = e.team?.logos?.[0]?.href || '';
-        html += `<tr class="${rowCls}">
+        html += `<tr>
           <td>${logo ? `<img class="std-team-logo" src="${logo}">` : ''}<span class="std-team-name">${e.team.displayName}</span></td>
           <td>${stats.wins ?? '-'}</td><td>${stats.ties ?? '-'}</td><td>${stats.losses ?? '-'}</td>
           <td>${stats.pointDifferential ?? '-'}</td><td class="std-pts">${stats.points ?? '-'}</td>
@@ -423,10 +415,7 @@ async function loadStandings() {
       }
       html += `</tbody></table></div>`;
     }
-    html += '</div><div class="std-legend">' +
-      '<span><i style="background:#27a14a;"></i> Advancing to Round of 32</span>' +
-      '<span><i style="background:#c9a227;"></i> In contention (best 3rd place)</span>' +
-      '<span><i style="background:#3a5a76;"></i> Eliminated</span></div>';
+    html += '</div>';
     el.innerHTML = html;
   } catch(e) {
     el.innerHTML = '<div class="ldr-empty">Could not load live standings. Try again later.</div>';
