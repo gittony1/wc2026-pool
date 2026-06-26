@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Cup 2026 Knockout Bracket</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #07111f; color: #e8edf2; min-height: 100vh; }
+header { background: linear-gradient(135deg, #0f3d24, #0a2318); padding: 14px 20px; text-align: center; border-bottom: 2px solid #c9a227; }
+header h1 { font-size: 18px; font-weight: 800; }
+.wc { color: #c9a227; }
+.test-badge { background: #8c1f1f; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+input[type="text"], input[type="password"] { background: #091e36; border: 1px solid #1a3350; border-radius: 8px; color: #e8edf2; padding: 9px 13px; font-size: 13px; outline: none; width: 100%; transition: border 0.15s; }
+input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; }
+.btn { display: block; width: 100%; padding: 11px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-gold { background: #c9a227; color: #07111f; }
+.btn-gold:hover:not(:disabled) { background: #dab83a; }
+.btn-gold:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-green { background: #1e7a40; color: #fff; }
+.btn-green:hover { background: #25924d; }
+.card { background: #0b1d2e; border: 1px solid #1a3350; border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+.card-title { font-size: 12px; font-weight: 800; color: #c9a227; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 14px; }
+.muted { color: #5a7a96; font-size: 13px; }
+
+/* Name screen */
+#nameScreen { max-width: 380px; margin: 48px auto; padding: 0 20px; }
+#nameScreen h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; text-align: center; }
+#nameScreen input { margin-bottom: 10px; }
+
+/* Progress bar */
+#progressBar { background: #0b1d2e; border-bottom: 1px solid #1a3350; padding: 10px 20px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 50; }
+.prog-num { font-size: 22px; font-weight: 800; color: #c9a227; line-height: 1; }
+.prog-label { font-size: 11px; color: #5a7a96; }
+.prog-track { flex: 1; height: 5px; background: #1a3350; border-radius: 3px; }
+.prog-fill { height: 100%; background: #c9a227; border-radius: 3px; transition: width 0.2s; }
+.prog-remain { font-size: 12px; color: #5a7a96; white-space: nowrap; }
+.prog-remain.done { color: #27a14a; font-weight: 700; }
+
+/* Bracket */
+#bracketScroll { overflow-x: auto; padding: 16px; }
+.bracket { display: flex; gap: 6px; align-items: flex-start; min-width: max-content; }
+.b-col { display: flex; flex-direction: column; gap: 4px; }
+.b-col-inner { display: flex; flex-direction: column; justify-content: space-around; height: 600px; }
+.col-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #5a7a96; text-align: center; padding-bottom: 8px; white-space: nowrap; }
+.col-label.gold { color: #c9a227; }
+
+/* Match cards */
+.match { background: #0b1d2e; border: 1px solid #1a3350; border-radius: 7px; overflow: hidden; width: 138px; }
+.match.final-match { border-color: #c9a227; width: 158px; }
+.team-slot { display: block; width: 100%; padding: 7px 8px; text-align: left; font-size: 11px; cursor: pointer; border: none; color: #8fa8c0; background: none; border-bottom: 1px solid #0d2236; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.1s, color 0.1s; }
+.team-slot:last-child { border-bottom: none; }
+.team-slot:hover { background: #0f2a40; color: #e8edf2; }
+.team-slot.picked { background: #0f3d24 !important; color: #fff !important; font-weight: 700; }
+.team-slot.tbd { color: #2a3f54; font-style: italic; cursor: default; }
+.team-slot.tbd:hover { background: none; }
+.champ-slot { display: block; padding: 12px 10px; text-align: center; font-size: 12px; font-weight: 800; color: #c9a227; }
+
+/* Divider */
+.b-divider { width: 1px; background: #1a3350; margin: 0 2px; align-self: stretch; margin-top: 29px; }
+
+/* Submit */
+#submitArea { max-width: 380px; margin: 16px auto; padding: 0 20px 40px; }
+#submitError { color: #f07070; font-size: 13px; margin-top: 8px; text-align: center; }
+
+/* Thank you */
+#thankYou { display: none; text-align: center; padding: 48px 20px; max-width: 480px; margin: 0 auto; }
+#thankYou .big { font-size: 52px; }
+#thankYou h2 { font-size: 22px; font-weight: 800; color: #c9a227; margin: 12px 0 8px; }
+#thankYou p { color: #8fa8c0; font-size: 14px; }
+.start-over { margin-top: 16px; background: none; border: 1px solid #1a3350; color: #5a7a96; padding: 7px 16px; border-radius: 8px; font-size: 12px; cursor: pointer; }
+
+/* Commissioner */
+#commToggle { display: block; text-align: center; margin: 10px auto; font-size: 12px; color: #3a5a76; cursor: pointer; background: none; border: none; text-decoration: underline; padding: 8px; }
+#commArea { max-width: 580px; margin: 0 auto; padding: 0 16px 40px; display: none; }
+.match-setup-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; margin-bottom: 6px; }
+.match-setup-row span { text-align: center; font-size: 11px; color: #3a5a76; }
+.match-setup-row input { font-size: 12px; padding: 6px 10px; }
+.match-num-label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #3a5a76; margin: 10px 0 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ <span class="wc">World Cup 2026</span> Knockout Bracket</h1>
+</header>
+<p class="muted" style="text-align:center;padding:14px 20px;">Official Round of 32 pairings are based on the FIFA 2026 knockout stage bracket.</p>
+
+<!-- Name screen -->
+<div id="nameScreen">
+  <h2>Enter your name to fill in your bracket</h2>
+  <input type="text" id="nameInput" placeholder="Your name" maxlength="60"
+    oninput="document.getElementById('startBtn').disabled=!this.value.trim()"
+    onkeydown="if(event.key==='Enter'&&this.value.trim())startBracket()" />
+  <button class="btn btn-gold" id="startBtn" onclick="startBracket()" disabled>Fill In My Bracket →</button>
+</div>
+
+<!-- Bracket UI -->
+<div id="bracketUI" style="display:none;">
+  <div id="progressBar">
+    <div><div class="prog-num" id="progNum">0</div><div class="prog-label">of 31 picks</div></div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="prog-remain" id="progRemain">31 left</div>
+  </div>
+  <div id="bracketScroll"><div class="bracket" id="bracket"></div></div>
+  <div id="submitArea">
+    <button class="btn btn-gold" id="submitBtn" onclick="submitBracket()" disabled>Submit My Bracket →</button>
+    <div id="submitError"></div>
+  </div>
+</div>
+
+<!-- Thank you -->
+<div id="thankYou">
+  <div class="big">🏆</div>
+  <h2>Bracket locked in!</h2>
+  <p id="tyName"></p>
+  <p style="margin-top:4px;font-size:12px;color:#3a5a76;">Good luck!</p>
+  <button class="start-over" onclick="startOver()">Not you? Start over</button>
+</div>
+
+<!-- Commissioner -->
+<button id="commToggle" onclick="toggleComm()">⚙ Commissioner Setup</button>
+<div id="commArea">
+  <div class="card">
+    <div class="card-title">Set Up Round of 32 Matchups</div>
+    <p class="muted" style="margin-bottom:14px;font-size:12px;">Enter the official 16 Round of 32 matchups. Matches 1–8 go in the left half of the bracket, 9–16 in the right half.</p>
+    <div id="setupForm"></div>
+    <div style="margin-top:14px;">
+      <button class="btn btn-green" onclick="saveBracket()" style="display:inline-block;width:auto;padding:9px 20px;">Save Bracket</button>
+      <span id="setupMsg" style="font-size:12px;color:#6ec98a;margin-left:12px;"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+const FLAGS = {
+  'Mexico':'🇲🇽','South Korea':'🇰🇷','Czech Republic':'🇨🇿','South Africa':'🇿🇦',
+  'Canada':'🇨🇦','Switzerland':'🇨🇭','Bosnia and Herzegovina':'🇧🇦','Qatar':'🇶🇦',
+  'Brazil':'🇧🇷','Morocco':'🇲🇦','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Haiti':'🇭🇹',
+  'United States':'🇺🇸','Turkey':'🇹🇷','Australia':'🇦🇺','Paraguay':'🇵🇾',
+  'Germany':'🇩🇪','Ivory Coast':'🇨🇮','Ecuador':'🇪🇨','Curaçao':'🇨🇼',
+  'Netherlands':'🇳🇱','Japan':'🇯🇵','Sweden':'🇸🇪','Tunisia':'🇹🇳',
+  'Belgium':'🇧🇪','Iran':'🇮🇷','Egypt':'🇪🇬','New Zealand':'🇳🇿',
+  'Spain':'🇪🇸','Uruguay':'🇺🇾','Saudi Arabia':'🇸🇦','Cape Verde':'🇨🇻',
+  'France':'🇫🇷','Senegal':'🇸🇳','Norway':'🇳🇴','Iraq':'🇮🇶',
+  'Argentina':'🇦🇷','Austria':'🇦🇹','Algeria':'🇩🇿','Jordan':'🇯🇴',
+  'Portugal':'🇵🇹','Colombia':'🇨🇴','DR Congo':'🇨🇩','Uzbekistan':'🇺🇿',
+  'England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Croatia':'🇭🇷','Ghana':'🇬🇭','Panama':'🇵🇦'
+};
+function f(name) { return (FLAGS[name] || '') + (FLAGS[name] ? ' ' : ''); }
+
+// Default official Round of 32 matchups based on the FIFA 2026 knockout stage bracket
+const DEFAULT = [
+  ['South Africa','Canada'],
+  ['Brazil','Japan'],
+  ['Germany','3rd Group C/D/F'],
+  ['Netherlands','Morocco'],
+  ['Ivory Coast','Norway'],
+  ['France','3rd Group F/G'],
+  ['Mexico','3rd Group C/E/H'],
+  ['Winner Group L','3rd Group E/I/J/K'],
+  ['Winner Group G','3rd Group A/H/I/J'],
+  ['United States','Bosnia and Herzegovina'],
+  ['Winner Group H','Runner-up Group J'],
+  ['Runner-up Group K','Runner-up Group L'],
+  ['Switzerland','3rd Group E/G/I/J'],
+  ['Australia','Runner-up Group G'],
+  ['Argentina','Runner-up Group H'],
+  ['Winner Group K','3rd Group D/E/I/L']
+];
+
+let setup = JSON.parse(localStorage.getItem('wc2026_bsetup') || 'null') || DEFAULT;
+let picks = {};
+let userName = '';
+
+// Bracket column layout:
+// [R32 L] [R16 L] [QF L] [SF L] | [Final] | [SF R] [QF R] [R16 R] [R32 R]
+// Left half uses match indices 0-7, right half 8-15
+
+const COLS = [
+  { round:'r32', indices:[0,1,2,3,4,5,6,7],     label:'Round of 32' },
+  { round:'r16', indices:[0,1,2,3],              label:'Round of 16' },
+  { round:'qf',  indices:[0,1],                  label:'Quarters'    },
+  { round:'sf',  indices:[0],                    label:'Semis'       },
+  { round:'final',indices:[0],                   label:'Final', isFinal:true },
+  { round:'sf',  indices:[1],                    label:'Semis'       },
+  { round:'qf',  indices:[2,3],                  label:'Quarters'    },
+  { round:'r16', indices:[4,5,6,7],              label:'Round of 16' },
+  { round:'r32', indices:[8,9,10,11,12,13,14,15],label:'Round of 32' },
+];
+
+const PREV = { r16:'r32', qf:'r16', sf:'qf', final:'sf' };
+
+function getTeam(round, matchIdx, pos) {
+  if (round === 'r32') return (setup[matchIdx] || ['',''])[pos] || '';
+  const prev = PREV[round];
+  return picks[`${prev}_${matchIdx*2+pos}`] || '';
+}
+
+function pick(round, matchIdx, team) {
+  const key = `${round}_${matchIdx}`;
+  if (picks[key] === team) return;
+  const old = picks[key];
+  if (old) clearDownstream(round, matchIdx, old);
+  picks[key] = team;
+  render();
+}
+
+function clearDownstream(round, matchIdx, team) {
+  const next = { r32:'r16', r16:'qf', qf:'sf', sf:'final' }[round];
+  if (!next) return;
+  const nextIdx = Math.floor(matchIdx / 2);
+  const key = `${next}_${nextIdx}`;
+  if (picks[key] === team) { delete picks[key]; clearDownstream(next, nextIdx, team); }
+}
+
+function render() {
+  const bracket = document.getElementById('bracket');
+  let html = '';
+
+  for (const col of COLS) {
+    const { round, indices, label, isFinal } = col;
+    html += `<div class="b-col">
+      <div class="col-label${isFinal?' gold':''}">${label}</div>
+      <div class="b-col-inner">`;
+
+    for (const idx of indices) {
+      const t0 = getTeam(round, idx, 0);
+      const t1 = getTeam(round, idx, 1);
+      const winner = picks[`${round}_${idx}`] || '';
+
+      html += `<div class="match${isFinal?' final-match':''}">`;
+
+      if (isFinal && winner) {
+        html += `<div class="champ-slot">🏆 ${f(winner)}${winner}</div>`;
+      } else {
+        for (const [pos, team] of [[0,t0],[1,t1]]) {
+          if (!team) {
+            html += `<button class="team-slot tbd" disabled>TBD</button>`;
+          } else {
+            const picked = winner === team;
+            html += `<button class="team-slot${picked?' picked':''}"
+              data-round="${round}" data-idx="${idx}" data-team="${esc(team)}"
+              >${f(team)}${team}</button>`;
+          }
+        }
+      }
+
+      html += `</div>`;
+    }
+
+    html += `</div></div>`;
+
+    // Divider between left half and right half
+    if (isFinal) html += `<div class="b-divider"></div>`;
+  }
+
+  bracket.innerHTML = html;
+
+  // Event delegation for picks
+  bracket.onclick = e => {
+    const btn = e.target.closest('[data-round]');
+    if (!btn) return;
+    pick(btn.dataset.round, parseInt(btn.dataset.idx), btn.dataset.team);
+  };
+
+  // Progress
+  const n = Object.keys(picks).length;
+  document.getElementById('progNum').textContent = n;
+  document.getElementById('progFill').style.width = (n / 31 * 100) + '%';
+  const rem = document.getElementById('progRemain');
+  rem.textContent = n >= 31 ? '✓ Done!' : (31 - n) + ' left';
+  rem.className = 'prog-remain' + (n >= 31 ? ' done' : '');
+  document.getElementById('submitBtn').disabled = n < 31;
+}
+
+function esc(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function startBracket() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) return;
+  userName = name;
+  document.getElementById('nameScreen').style.display = 'none';
+  document.getElementById('bracketUI').style.display = '';
+  render();
+}
+
+function submitBracket() {
+  if (Object.keys(picks).length < 31) return;
+  localStorage.setItem('wc2026_bpicks', JSON.stringify({ name: userName, picks }));
+  document.getElementById('bracketUI').style.display = 'none';
+  document.getElementById('thankYou').style.display = 'block';
+  document.getElementById('tyName').textContent = `Thanks, ${userName}!`;
+}
+
+function startOver() {
+  localStorage.removeItem('wc2026_bpicks');
+  picks = {};
+  userName = '';
+  document.getElementById('thankYou').style.display = 'none';
+  document.getElementById('nameScreen').style.display = '';
+  document.getElementById('nameInput').value = '';
+  document.getElementById('startBtn').disabled = true;
+}
+
+// Commissioner
+let commOpen = false;
+function toggleComm() {
+  commOpen = !commOpen;
+  document.getElementById('commArea').style.display = commOpen ? '' : 'none';
+  if (commOpen) renderSetupForm();
+}
+
+function renderSetupForm() {
+  let html = '';
+  for (let i = 0; i < 16; i++) {
+    const t = setup[i] || ['',''];
+    html += `<div class="match-num-label">Match ${i+1}${i < 8 ? ' — Left bracket' : ' — Right bracket'}</div>
+      <div class="match-setup-row">
+        <input type="text" id="s${i}a" value="${t[0]}" placeholder="Team 1" />
+        <span>vs</span>
+        <input type="text" id="s${i}b" value="${t[1]}" placeholder="Team 2" />
+      </div>`;
+  }
+  document.getElementById('setupForm').innerHTML = html;
+}
+
+function saveBracket() {
+  setup = Array.from({length:16}, (_,i) => [
+    document.getElementById(`s${i}a`).value.trim(),
+    document.getElementById(`s${i}b`).value.trim()
+  ]);
+  localStorage.setItem('wc2026_bsetup', JSON.stringify(setup));
+  picks = {};
+  const msg = document.getElementById('setupMsg');
+  msg.textContent = '✓ Saved!';
+  setTimeout(() => msg.textContent = '', 2500);
+  if (document.getElementById('bracketUI').style.display !== 'none') render();
+}
+
+// Check for existing submission
+const saved = localStorage.getItem('wc2026_bpicks');
+if (saved) {
+  try {
+    const d = JSON.parse(saved);
+    userName = d.name; picks = d.picks;
+    document.getElementById('nameScreen').style.display = 'none';
+    document.getElementById('thankYou').style.display = 'block';
+    document.getElementById('tyName').textContent = `Thanks, ${userName}!`;
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
