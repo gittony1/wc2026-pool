@@ -150,23 +150,24 @@ const FLAGS = {
 function f(name) { return (FLAGS[name] || '') + (FLAGS[name] ? ' ' : ''); }
 
 // Default official Round of 32 matchups based on the FIFA 2026 knockout stage bracket
+// Arranged in pairs that face each other in Round of 16:
 const DEFAULT = [
-  ['South Africa','Canada'],
-  ['Brazil','Japan'],
-  ['Germany','3rd Group C/D/F'],
-  ['Netherlands','Morocco'],
-  ['Ivory Coast','Norway'],
-  ['France','3rd Group F/G'],
-  ['Mexico','3rd Group C/E/H'],
-  ['Winner Group L','3rd Group E/I/J/K'],
-  ['Winner Group G','3rd Group A/H/I/J'],
-  ['United States','Bosnia and Herzegovina'],
-  ['Winner Group H','Runner-up Group J'],
-  ['Runner-up Group K','Runner-up Group L'],
-  ['Switzerland','3rd Group E/G/I/J'],
-  ['Australia','Runner-up Group G'],
-  ['Argentina','Runner-up Group H'],
-  ['Winner Group K','3rd Group D/E/I/L']
+  ['South Africa','Canada'],              // R16: faces Netherlands/Morocco (index 1)
+  ['Netherlands','Morocco'],              // R16: faces SA/Canada (index 0)
+  ['Germany','3rd Group C/D/F'],          // R16: faces France (index 3)
+  ['France','3rd Group F/G'],             // R16: faces Germany (index 2)
+  ['Brazil','Japan'],                     // R16: faces Ivory Coast/Norway (index 5)
+  ['Ivory Coast','Norway'],               // R16: faces Brazil/Japan (index 4)
+  ['Mexico','3rd Group C/E/H'],           // R16: faces Group L winner (index 7)
+  ['Winner Group L','3rd Group E/I/J/K'], // R16: faces Mexico (index 6)
+  ['Runner-up Group K','Runner-up Group L'], // R16: faces Group H winner (index 9)
+  ['Winner Group H','Runner-up Group J'],     // R16: faces K/L runners-up (index 8)
+  ['United States','Bosnia and Herzegovina'], // R16: faces Group G winner (index 11)
+  ['Winner Group G','3rd Group A/H/I/J'],     // R16: faces USA (index 10)
+  ['Argentina','Runner-up Group H'],          // R16: faces Australia (index 13)
+  ['Australia','Runner-up Group G'],          // R16: faces Argentina (index 12)
+  ['Switzerland','3rd Group E/G/I/J'],        // R16: faces Group K winner (index 15)
+  ['Winner Group K','3rd Group D/E/I/L']      // R16: faces Switzerland (index 14)
 ];
 
 let setup = JSON.parse(localStorage.getItem('wc2026_bsetup') || 'null') || DEFAULT;
