@@ -91,7 +91,7 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
   <h1>🏆 Knockout Bracket</h1>
 </header>
 <div id="liveStatus" style="text-align:center;padding:8px 20px 0;font-size:12px;color:#2f6690;">Loading latest group results…</div>
-<p class="muted" style="text-align:center;padding:14px 20px;">Official Round of 32 pairings follow the ESPN bracket layout for accurate positioning.</p>
+<p id="bracketIntro" class="muted" style="text-align:center;padding:14px 20px;">Official Round of 32 pairings follow the ESPN bracket layout for accurate positioning.</p>
 
 <!-- Name entry -->
 <div id="nameScreen" style="max-width:420px;margin:24px auto 0;padding:0 20px 16px;">
@@ -474,6 +474,9 @@ async function submitBracket() {
       body: JSON.stringify({ name: userName, type: 'bracket', picks })
     });
     localStorage.setItem('wc2026_bpicks', JSON.stringify({ name: userName, picks }));
+    document.getElementById('liveStatus').style.display = 'none';
+    document.getElementById('bracketIntro').style.display = 'none';
+    document.getElementById('nameScreen').style.display = 'none';
     document.getElementById('bracketUI').style.display = 'none';
     document.getElementById('thankYou').style.display = 'block';
     document.getElementById('tyName').textContent = `Thanks, ${userName}!`;
@@ -489,6 +492,8 @@ function startOver() {
   picks = {};
   userName = '';
   document.getElementById('thankYou').style.display = 'none';
+  document.getElementById('liveStatus').style.display = '';
+  document.getElementById('bracketIntro').style.display = '';
   document.getElementById('nameScreen').style.display = '';
   document.getElementById('nameInput').value = '';
   document.getElementById('bracketUI').style.display = '';
@@ -537,6 +542,8 @@ if (saved) {
   try {
     const d = JSON.parse(saved);
     userName = d.name; picks = d.picks;
+    document.getElementById('liveStatus').style.display = 'none';
+    document.getElementById('bracketIntro').style.display = 'none';
     document.getElementById('nameScreen').style.display = 'none';
     document.getElementById('thankYou').style.display = 'block';
     document.getElementById('tyName').textContent = `Thanks, ${userName}!`;
