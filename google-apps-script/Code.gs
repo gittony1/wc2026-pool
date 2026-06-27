@@ -38,13 +38,13 @@ const R32_SETUP = [
   ['2K','2L'],
   ['Spain','2J'],
   ['United States','Bosnia and Herzegovina'],
-  ['1G','3RD A/E/H/I/J'],
+  ['Belgium','3RD A/E/H/I/J'],
   ['Brazil','Japan'],
   ['Ivory Coast','Norway'],
   ['Mexico','3RD C/E/F/H/I'],
   ['1L','3RD E/H/I/J/K'],
   ['Argentina','Cape Verde'],
-  ['Australia','2G'],
+  ['Australia','Egypt'],
   ['Switzerland','3RD E/F/G/I/J'],
   ['1K','3RD D/E/I/J/L']
 ];
