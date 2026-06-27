@@ -39,7 +39,8 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 
 /* Bracket */
 #bracketScroll { overflow-x: auto; padding: 16px; }
-.bracket { display: flex; gap: 6px; align-items: flex-start; min-width: max-content; }
+.bracket { display: flex; gap: 34px; align-items: flex-start; min-width: max-content; position: relative; }
+#bracketLines { position: absolute; top: 0; left: 0; z-index: -1; pointer-events: none; }
 .b-col { display: flex; flex-direction: column; gap: 4px; }
 .b-col-inner { display: flex; flex-direction: column; justify-content: space-around; height: 600px; }
 .col-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #5a7a96; text-align: center; padding-bottom: 8px; white-space: nowrap; }
@@ -58,6 +59,11 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 
 /* Divider */
 .b-divider { width: 1px; background: #1a3350; margin: 0 2px; align-self: stretch; margin-top: 29px; }
+
+/* Third place match */
+.third-place { margin-top: 28px; }
+.third-label { color: #c98a3a; }
+.match.third-match { width: 158px; border-color: #4a3318; }
 
 /* Submit */
 #submitArea { max-width: 380px; margin: 16px auto; padding: 0 20px 40px; }
@@ -85,22 +91,23 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
   <h1>⚽ <span class="wc">World Cup 2026</span> Knockout Bracket</h1>
 </header>
 <div id="liveStatus" style="text-align:center;padding:8px 20px 0;font-size:12px;color:#7aadcc;">Loading latest group results…</div>
-<p class="muted" style="text-align:center;padding:14px 20px;">Official Round of 32 pairings are based on the FIFA 2026 knockout stage bracket and update live as group results come in.</p>
+<p class="muted" style="text-align:center;padding:14px 20px;">Official Round of 32 pairings follow the ESPN bracket layout for accurate positioning.</p>
 
 <!-- Name entry -->
 <div id="nameScreen" style="max-width:420px;margin:24px auto 0;padding:0 20px 16px;">
-  <h2 style="font-size:16px;font-weight:700;margin-bottom:10px;text-align:center;">Your name (optional)</h2>
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:10px;text-align:center;">Your name</h2>
   <input type="text" id="nameInput" placeholder="Your name" maxlength="60"
     oninput="userName = this.value.trim(); render();"
     onkeydown="if(event.key==='Enter') render();" />
+  <p class="muted" style="text-align:center;font-size:11px;margin-top:6px;">Needed to put you on the leaderboard.</p>
 </div>
 
 <!-- Bracket UI -->
 <div id="bracketUI">
   <div id="progressBar">
-    <div><div class="prog-num" id="progNum">0</div><div class="prog-label">of 31 picks</div></div>
+    <div><div class="prog-num" id="progNum">0</div><div class="prog-label">of 32 picks</div></div>
     <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
-    <div class="prog-remain" id="progRemain">31 left</div>
+    <div class="prog-remain" id="progRemain">32 left</div>
   </div>
   <div id="bracketScroll"><div class="bracket" id="bracket"></div></div>
   <div id="submitArea">
@@ -149,36 +156,35 @@ const FLAGS = {
 };
 function f(name) { return (FLAGS[name] || '') + (FLAGS[name] ? ' ' : ''); }
 
-// Default official Round of 32 matchups based on the FIFA 2026 knockout stage bracket.
-// The order here matches the official bracket layout so the left/right halves line up correctly.
+// Default official Round of 32 matchups ordered to match the ESPN bracket layout.
 const DEFAULT = [
-  ['South Africa','Canada'],                  // left side: faces Netherlands/Morocco in R16
-  ['Netherlands','Morocco'],                  // left side: faces SA/Canada in R16
-  ['Germany','3rd Group C/D/F'],              // left side: faces France in R16
-  ['France','3rd Group F/G'],                 // left side: faces Germany in R16
-  ['United States','Bosnia and Herzegovina'], // left side: separate from Argentina/Australia
-  ['Winner Group G','3rd Group A/H/I/J'],    // left side: faces USA in R16
-  ['Brazil','Japan'],                         // left side: faces Ivory Coast/Norway in R16
-  ['Ivory Coast','Norway'],                   // left side: faces Brazil/Japan in R16
-  ['Mexico','3rd Group C/E/H'],               // right side: faces Group L winner in R16
-  ['Winner Group L','3rd Group E/I/J/K'],     // right side: faces Mexico in R16
-  ['Winner Group H','Runner-up Group J'],     // right side: faces K/L runners-up in R16
-  ['Runner-up Group K','Runner-up Group L'], // right side: faces Group H winner in R16
-  ['Argentina','Runner-up Group H'],          // right side: faces Australia in R16
-  ['Australia','Runner-up Group G'],          // right side: faces Argentina in R16
-  ['Switzerland','3rd Group E/G/I/J'],        // right side: faces Group K winner in R16
-  ['Winner Group K','3rd Group D/E/I/L']     // right side: faces Switzerland in R16
+  ['Germany','Paraguay'],
+  ['France','Sweden'],
+  ['South Africa','Canada'],
+  ['Netherlands','Morocco'],
+  ['2K','2L'],
+  ['Spain','2J'],
+  ['United States','Bosnia and Herzegovina'],
+  ['1G','3RD A/E/H/I/J'],
+  ['Brazil','Japan'],
+  ['Ivory Coast','Norway'],
+  ['Mexico','3RD C/E/F/H/I'],
+  ['1L','3RD E/H/I/J/K'],
+  ['Argentina','Cape Verde'],
+  ['Australia','2G'],
+  ['Switzerland','3RD E/F/G/I/J'],
+  ['1K','3RD D/E/I/J/L']
 ];
 
 const BRACKET_STORAGE_KEY = 'wc2026_bsetup';
 const BRACKET_LAYOUT_VERSION_KEY = 'wc2026_bsetup_version';
-const BRACKET_LAYOUT_VERSION = 3;
+const BRACKET_LAYOUT_VERSION = 4;
+const BRACKET_CUSTOM_OVERRIDE_KEY = 'wc2026_bsetup_override';
 
 function loadSetup() {
   const storedSetup = JSON.parse(localStorage.getItem(BRACKET_STORAGE_KEY) || 'null');
-  const storedVersion = Number(localStorage.getItem(BRACKET_LAYOUT_VERSION_KEY) || '0');
 
-  if (Array.isArray(storedSetup) && storedSetup.length === DEFAULT.length && storedVersion >= BRACKET_LAYOUT_VERSION) {
+  if (Array.isArray(storedSetup) && storedSetup.length === DEFAULT.length) {
     return storedSetup;
   }
 
@@ -191,13 +197,16 @@ let setup = loadSetup();
 let picks = {};
 let userName = '';
 
-const ESPN_STANDINGS_URL = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
 const TEAM_NAME_ALIASES = {
   'Bosnia-Herzegovina': 'Bosnia and Herzegovina',
   'Bosnia & Herzegovina': 'Bosnia and Herzegovina',
+  'Bosnia-Herz.': 'Bosnia and Herzegovina',
   'Czechia': 'Czech Republic',
   'USA': 'United States',
-  'U.S.': 'United States'
+  'U.S.': 'United States',
+  'Cabo Verde': 'Cape Verde',
+  'Türkiye': 'Turkey',
+  'Congo DR': 'DR Congo'
 };
 
 function canonicalTeamName(name) {
@@ -211,81 +220,22 @@ function setLiveStatus(message) {
   if (el) el.textContent = message;
 }
 
-function hasCompletedGroup(groupData, groupLetter) {
-  const group = groupData[groupLetter.toUpperCase()];
-  if (!group || group.length < 4) return false;
-  return group.every(entry => Number(entry.gamesPlayed || 0) >= 3);
+function hasCustomSetupOverride() {
+  return localStorage.getItem(BRACKET_CUSTOM_OVERRIDE_KEY) === '1';
 }
 
-function getGroupStandings(groupData, groupLetter, rankIndex) {
-  const group = groupData[groupLetter.toUpperCase()];
-  if (!group || !group[rankIndex]) return null;
-  return group[rankIndex];
-}
-
-function resolveLiveTeamName(teamName, groupData) {
-  if (typeof teamName !== 'string') return teamName;
-  const normalized = teamName.trim();
-
-  const winnerMatch = normalized.match(/^Winner Group ([A-L])$/i);
-  if (winnerMatch) {
-    return hasCompletedGroup(groupData, winnerMatch[1])
-      ? (getGroupStandings(groupData, winnerMatch[1], 0)?.team || normalized)
-      : normalized;
+function refreshBracketFromOfficialSource() {
+  if (hasCustomSetupOverride()) {
+    setLiveStatus('Using your saved bracket setup');
+    return;
   }
 
-  const runnerUpMatch = normalized.match(/^Runner-up Group ([A-L])$/i);
-  if (runnerUpMatch) {
-    return hasCompletedGroup(groupData, runnerUpMatch[1])
-      ? (getGroupStandings(groupData, runnerUpMatch[1], 1)?.team || normalized)
-      : normalized;
-  }
-
-  return normalized;
+  setup = DEFAULT.map(match => match.slice());
+  localStorage.setItem(BRACKET_STORAGE_KEY, JSON.stringify(setup));
+  localStorage.setItem(BRACKET_LAYOUT_VERSION_KEY, String(BRACKET_LAYOUT_VERSION));
+  if (document.getElementById('bracketUI') && document.getElementById('bracketUI').style.display !== 'none') render();
+  setLiveStatus('Using the official ESPN bracket layout');
 }
-
-function applyLiveStandingsToSetup(groupData) {
-  const updatedSetup = setup.map(match => match.map(team => resolveLiveTeamName(team, groupData)));
-  if (JSON.stringify(updatedSetup) !== JSON.stringify(setup)) {
-    setup = updatedSetup;
-    if (typeof localStorage !== 'undefined') localStorage.setItem('wc2026_bsetup', JSON.stringify(setup));
-    if (document.getElementById('bracketUI') && document.getElementById('bracketUI').style.display !== 'none') render();
-    return true;
-  }
-  return false;
-}
-
-async function refreshBracketFromLiveResults() {
-  try {
-    const res = await fetch(ESPN_STANDINGS_URL);
-    if (!res.ok) throw new Error('standings request failed');
-    const data = await res.json();
-    const groupData = {};
-    const groups = data.children || [];
-
-    for (const groupNode of groups) {
-      const letter = (groupNode.name || '').replace(/^Group\s+/i, '').trim().toUpperCase();
-      const entries = (groupNode.standings?.entries || []).slice().sort((a, b) => (a.note?.rank ?? 99) - (b.note?.rank ?? 99));
-      groupData[letter] = entries.map(entry => {
-        const stats = {};
-        (entry.stats || []).forEach(stat => { stats[stat.name] = stat.displayValue; });
-        return {
-          team: canonicalTeamName(entry.team?.displayName || entry.team?.name || ''),
-          points: Number(stats.points || 0),
-          gamesPlayed: Number(stats.gamesPlayed || 0)
-        };
-      });
-    }
-
-    const changed = applyLiveStandingsToSetup(groupData);
-    setLiveStatus(changed ? 'Live bracket updated from current group results' : 'Live bracket synced with current group results');
-  } catch (e) {
-    setLiveStatus('Live results unavailable right now');
-  }
-}
-
-refreshBracketFromLiveResults();
-setInterval(refreshBracketFromLiveResults, 60000);
 
 // Bracket column layout:
 // [R32 L] [R16 L] [QF L] [SF L] | [Final] | [SF R] [QF R] [R16 R] [R32 R]
@@ -304,13 +254,26 @@ const COLS = [
 ];
 
 const PREV = { r16:'r32', qf:'r16', sf:'qf', final:'sf' };
+const ROUND_ORDER = ['r32', 'r16', 'qf', 'sf', 'final'];
 
 render();
 
+refreshBracketFromOfficialSource();
+setInterval(refreshBracketFromOfficialSource, 1800000);
+
 function getTeam(round, matchIdx, pos) {
   if (round === 'r32') return (setup[matchIdx] || ['',''])[pos] || '';
+  if (round === 'third') return getLoser('sf', pos) || '';
   const prev = PREV[round];
   return picks[`${prev}_${matchIdx*2+pos}`] || '';
+}
+
+function getLoser(round, matchIdx) {
+  const t0 = getTeam(round, matchIdx, 0);
+  const t1 = getTeam(round, matchIdx, 1);
+  const winner = picks[`${round}_${matchIdx}`];
+  if (!winner) return '';
+  return winner === t0 ? t1 : t0;
 }
 
 function pick(round, matchIdx, team) {
@@ -332,7 +295,13 @@ function clearDownstream(round, matchIdx, team) {
 
 function render() {
   const bracket = document.getElementById('bracket');
-  let html = '';
+
+  // Drop a stale 3rd-place pick if a semifinal result changed underneath it
+  if (picks['third_0'] && ![getTeam('third',0,0), getTeam('third',0,1)].includes(picks['third_0'])) {
+    delete picks['third_0'];
+  }
+
+  let html = '<svg id="bracketLines"><g></g></svg>';
 
   for (const col of COLS) {
     const { round, indices, label, isFinal } = col;
@@ -345,7 +314,7 @@ function render() {
       const t1 = getTeam(round, idx, 1);
       const winner = picks[`${round}_${idx}`] || '';
 
-      html += `<div class="match${isFinal?' final-match':''}">`;
+      html += `<div class="match${isFinal?' final-match':''}" data-round="${round}" data-idx="${idx}">`;
 
       if (isFinal && winner) {
         html += `<div class="champ-slot">🏆 ${f(winner)}${winner}</div>`;
@@ -365,17 +334,40 @@ function render() {
       html += `</div>`;
     }
 
-    html += `</div></div>`;
+    html += `</div>`;
+
+    if (isFinal) {
+      const tp0 = getTeam('third', 0, 0);
+      const tp1 = getTeam('third', 0, 1);
+      const tpWinner = picks['third_0'] || '';
+      html += `<div class="third-place">
+        <div class="col-label third-label">3rd Place Match</div>
+        <div class="match third-match" data-round="third" data-idx="0">`;
+      for (const [pos, team] of [[0,tp0],[1,tp1]]) {
+        if (!team) {
+          html += `<button class="team-slot tbd" disabled>TBD</button>`;
+        } else {
+          const picked = tpWinner === team;
+          html += `<button class="team-slot${picked?' picked':''}"
+            data-round="third" data-idx="0" data-team="${esc(team)}"
+            >${f(team)}${team}</button>`;
+        }
+      }
+      html += `</div></div>`;
+    }
+
+    html += `</div>`;
 
     // Divider between left half and right half
     if (isFinal) html += `<div class="b-divider"></div>`;
   }
 
   bracket.innerHTML = html;
+  drawConnectors();
 
   // Event delegation for picks
   bracket.onclick = e => {
-    const btn = e.target.closest('[data-round]');
+    const btn = e.target.closest('.team-slot[data-team]');
     if (!btn) return;
     pick(btn.dataset.round, parseInt(btn.dataset.idx), btn.dataset.team);
   };
@@ -383,14 +375,64 @@ function render() {
   // Progress
   const n = Object.keys(picks).length;
   document.getElementById('progNum').textContent = n;
-  document.getElementById('progFill').style.width = (n / 31 * 100) + '%';
+  document.getElementById('progFill').style.width = (n / 32 * 100) + '%';
   const rem = document.getElementById('progRemain');
-  rem.textContent = n >= 31 ? '✓ Done!' : (31 - n) + ' left';
-  rem.className = 'prog-remain' + (n >= 31 ? ' done' : '');
-  document.getElementById('submitBtn').disabled = n < 31;
+  rem.textContent = n >= 32 ? '✓ Done!' : (32 - n) + ' left';
+  rem.className = 'prog-remain' + (n >= 32 ? ' done' : '');
+  document.getElementById('submitBtn').disabled = n < 32 || !userName.trim();
+}
+
+function drawConnectors() {
+  const container = document.getElementById('bracket');
+  const svg = document.getElementById('bracketLines');
+  if (!container || !svg) return;
+
+  const w = container.scrollWidth, h = container.scrollHeight;
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', h);
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+  const containerRect = container.getBoundingClientRect();
+  let paths = '';
+
+  for (let r = 0; r < ROUND_ORDER.length - 1; r++) {
+    const round = ROUND_ORDER[r];
+    const nextRound = ROUND_ORDER[r + 1];
+    container.querySelectorAll(`.match[data-round="${round}"]`).forEach(matchEl => {
+      const idx = parseInt(matchEl.dataset.idx);
+      const nextIdx = Math.floor(idx / 2);
+      const nextEl = container.querySelector(`.match[data-round="${nextRound}"][data-idx="${nextIdx}"]`);
+      if (!nextEl) return;
+
+      const a = matchEl.getBoundingClientRect();
+      const b = nextEl.getBoundingClientRect();
+      const aCenterX = a.left + a.width / 2 - containerRect.left;
+      const bCenterX = b.left + b.width / 2 - containerRect.left;
+
+      let exitX, entryX;
+      if (aCenterX < bCenterX) {
+        exitX = a.right - containerRect.left;
+        entryX = b.left - containerRect.left;
+      } else {
+        exitX = a.left - containerRect.left;
+        entryX = b.right - containerRect.left;
+      }
+      const midX = (exitX + entryX) / 2;
+      const ay = a.top + a.height / 2 - containerRect.top;
+      const by = b.top + b.height / 2 - containerRect.top;
+      const advanced = matchEl.querySelector('.team-slot.picked');
+      const stroke = advanced ? '#c9a227' : '#28435e';
+
+      paths += `<path d="M ${exitX} ${ay} H ${midX} V ${by} H ${entryX}" fill="none" stroke="${stroke}" stroke-width="2"/>`;
+    });
+  }
+
+  svg.querySelector('g').innerHTML = paths;
 }
 
 function esc(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+window.addEventListener('resize', drawConnectors);
 
 function startBracket() {
   userName = document.getElementById('nameInput').value.trim();
@@ -398,12 +440,32 @@ function startBracket() {
   render();
 }
 
-function submitBracket() {
-  if (Object.keys(picks).length < 31) return;
-  localStorage.setItem('wc2026_bpicks', JSON.stringify({ name: userName, picks }));
-  document.getElementById('bracketUI').style.display = 'none';
-  document.getElementById('thankYou').style.display = 'block';
-  document.getElementById('tyName').textContent = `Thanks, ${userName}!`;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYGdtHkwbD7lZRtk6Ct1gW2qqVlpVPy99BB0Ix9qq8nYvXaV4C0yB2rzliwNrTCod7/exec';
+
+async function submitBracket() {
+  if (Object.keys(picks).length < 32 || !userName.trim()) return;
+
+  const btn = document.getElementById('submitBtn');
+  const err = document.getElementById('submitError');
+  err.textContent = '';
+  btn.textContent = 'Submitting…';
+  btn.disabled = true;
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({ name: userName, type: 'bracket', picks })
+    });
+    localStorage.setItem('wc2026_bpicks', JSON.stringify({ name: userName, picks }));
+    document.getElementById('bracketUI').style.display = 'none';
+    document.getElementById('thankYou').style.display = 'block';
+    document.getElementById('tyName').textContent = `Thanks, ${userName}!`;
+  } catch (e) {
+    err.textContent = 'Submission failed. Check your connection and try again.';
+    btn.textContent = 'Submit My Bracket →';
+    btn.disabled = false;
+  }
 }
 
 function startOver() {
@@ -445,6 +507,7 @@ function saveBracket() {
     document.getElementById(`s${i}b`).value.trim()
   ]);
   localStorage.setItem('wc2026_bsetup', JSON.stringify(setup));
+  localStorage.setItem(BRACKET_CUSTOM_OVERRIDE_KEY, '1');
   picks = {};
   const msg = document.getElementById('setupMsg');
   msg.textContent = '✓ Saved!';
