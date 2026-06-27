@@ -87,17 +87,16 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 <div id="liveStatus" style="text-align:center;padding:8px 20px 0;font-size:12px;color:#7aadcc;">Loading latest group results…</div>
 <p class="muted" style="text-align:center;padding:14px 20px;">Official Round of 32 pairings are based on the FIFA 2026 knockout stage bracket and update live as group results come in.</p>
 
-<!-- Name screen -->
-<div id="nameScreen">
-  <h2>Enter your name to fill in your bracket</h2>
+<!-- Name entry -->
+<div id="nameScreen" style="max-width:420px;margin:24px auto 0;padding:0 20px 16px;">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:10px;text-align:center;">Your name (optional)</h2>
   <input type="text" id="nameInput" placeholder="Your name" maxlength="60"
-    oninput="document.getElementById('startBtn').disabled=!this.value.trim()"
-    onkeydown="if(event.key==='Enter'&&this.value.trim())startBracket()" />
-  <button class="btn btn-gold" id="startBtn" onclick="startBracket()" disabled>Fill In My Bracket →</button>
+    oninput="userName = this.value.trim(); if (document.getElementById('bracketUI')) document.getElementById('bracketUI').style.display = '';"
+    onkeydown="if(event.key==='Enter') document.getElementById('bracketUI').style.display = ''" />
 </div>
 
 <!-- Bracket UI -->
-<div id="bracketUI" style="display:none;">
+<div id="bracketUI">
   <div id="progressBar">
     <div><div class="prog-num" id="progNum">0</div><div class="prog-label">of 31 picks</div></div>
     <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
@@ -392,10 +391,7 @@ function render() {
 function esc(s) { return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 function startBracket() {
-  const name = document.getElementById('nameInput').value.trim();
-  if (!name) return;
-  userName = name;
-  document.getElementById('nameScreen').style.display = 'none';
+  userName = document.getElementById('nameInput').value.trim();
   document.getElementById('bracketUI').style.display = '';
   render();
 }
