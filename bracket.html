@@ -96,11 +96,11 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 
 <!-- Name entry -->
 <div id="nameScreen" style="max-width:420px;margin:24px auto 0;padding:0 20px 16px;">
-  <h2 style="font-size:16px;font-weight:700;margin-bottom:10px;text-align:center;">Your name</h2>
-  <input type="text" id="nameInput" placeholder="Your name" maxlength="60"
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:10px;text-align:center;">Your first and last name</h2>
+  <input type="text" id="nameInput" placeholder="First and last name" maxlength="60"
     oninput="userName = this.value.trim(); render();"
     onkeydown="if(event.key==='Enter') render();" />
-  <p class="muted" style="text-align:center;font-size:11px;margin-top:6px;">Needed to put you on the leaderboard.</p>
+  <p class="muted" style="text-align:center;font-size:11px;margin-top:6px;">Use your first and last name so it matches the spreadsheet.</p>
 </div>
 
 <!-- Bracket UI -->
