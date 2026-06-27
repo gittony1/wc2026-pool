@@ -188,21 +188,7 @@ table.std-table td:first-child { text-align: left; display: flex; align-items: c
 <div id="formWrap">
   <header>
     <h1>⚽ <span class="wc">World Cup 2026</span> Pool</h1>
-    <p style="font-size:13px;color:#8fa8c0;margin-top:6px;line-height:1.6;max-width:620px;margin-left:auto;margin-right:auto;">
-      Welcome to the Reach World Cup pool! This pool consists of two stages.<br><br>
-      <strong style="color:#c9a227;">1. Group Stage</strong> — Pick the 32 teams that will advance to the knockout stage.<br>
-      <strong style="color:#27a14a;">➜ Submit your entries by Thursday June 11 EOD</strong><br><br>
-      <strong style="color:#c9a227;">2. Knockout Stage</strong> — Pick the winner of each knockout matchup all the way to the champion, just like a March Madness bracket.<br><br>
-      The official Round of 32 bracket is shown below in the Make Picks page; fill it out alongside your group picks.<br><em style="color:#5a7a96;">(You can also open it in a new tab if you want more space.)</em><br>
-    </p>
   </header>
-
-  <div class="container">
-    <div class="card">
-      <div class="card-title">👤 Your Name</div>
-      <input type="text" id="nameInput" placeholder="First and last name" oninput="updateSubmit()" maxlength="60" />
-    </div>
-  </div>
 
   <div class="container container-wide">
     <div class="card">
@@ -317,14 +303,14 @@ function updateSubmit() {
     document.getElementById('deadlinePassed').style.display = '';
     return;
   }
-  const name = document.getElementById('nameInput').value.trim();
+  const name = document.getElementById('nameInput')?.value.trim() || '';
   document.getElementById('submitBtn').disabled = !(name && totalPicked() === 32);
 }
 
 function esc(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
 async function submitPicks() {
-  const name = document.getElementById('nameInput').value.trim();
+  const name = document.getElementById('nameInput')?.value.trim() || '';
   const err = document.getElementById('submitError');
   err.textContent = '';
   if (!name || totalPicked() !== 32) return;
@@ -457,7 +443,6 @@ function startOver() {
   picks = {};
   document.getElementById('thankYou').style.display = 'none';
   document.getElementById('formWrap').style.display = '';
-  document.getElementById('nameInput').value = '';
   renderGrid();
 }
 
