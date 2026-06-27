@@ -150,28 +150,45 @@ const FLAGS = {
 };
 function f(name) { return (FLAGS[name] || '') + (FLAGS[name] ? ' ' : ''); }
 
-// Default official Round of 32 matchups based on the FIFA 2026 knockout stage bracket
-// Arranged in pairs that face each other in Round of 16:
+// Default official Round of 32 matchups based on the FIFA 2026 knockout stage bracket.
+// The order here matches the official bracket layout so the left/right halves line up correctly.
 const DEFAULT = [
-  ['South Africa','Canada'],              // R16: faces Netherlands/Morocco (index 1)
-  ['Netherlands','Morocco'],              // R16: faces SA/Canada (index 0)
-  ['Germany','3rd Group C/D/F'],          // R16: faces France (index 3)
-  ['France','3rd Group F/G'],             // R16: faces Germany (index 2)
-  ['Brazil','Japan'],                     // R16: faces Ivory Coast/Norway (index 5)
-  ['Ivory Coast','Norway'],               // R16: faces Brazil/Japan (index 4)
-  ['Mexico','3rd Group C/E/H'],           // R16: faces Group L winner (index 7)
-  ['Winner Group L','3rd Group E/I/J/K'], // R16: faces Mexico (index 6)
-  ['Runner-up Group K','Runner-up Group L'], // R16: faces Group H winner (index 9)
-  ['Winner Group H','Runner-up Group J'],     // R16: faces K/L runners-up (index 8)
-  ['United States','Bosnia and Herzegovina'], // R16: faces Group G winner (index 11)
-  ['Winner Group G','3rd Group A/H/I/J'],     // R16: faces USA (index 10)
-  ['Argentina','Runner-up Group H'],          // R16: faces Australia (index 13)
-  ['Australia','Runner-up Group G'],          // R16: faces Argentina (index 12)
-  ['Switzerland','3rd Group E/G/I/J'],        // R16: faces Group K winner (index 15)
-  ['Winner Group K','3rd Group D/E/I/L']      // R16: faces Switzerland (index 14)
+  ['South Africa','Canada'],                  // left side: faces Netherlands/Morocco in R16
+  ['Netherlands','Morocco'],                  // left side: faces SA/Canada in R16
+  ['Germany','3rd Group C/D/F'],              // left side: faces France in R16
+  ['France','3rd Group F/G'],                 // left side: faces Germany in R16
+  ['United States','Bosnia and Herzegovina'], // left side: separate from Argentina/Australia
+  ['Winner Group G','3rd Group A/H/I/J'],    // left side: faces USA in R16
+  ['Brazil','Japan'],                         // left side: faces Ivory Coast/Norway in R16
+  ['Ivory Coast','Norway'],                   // left side: faces Brazil/Japan in R16
+  ['Mexico','3rd Group C/E/H'],               // right side: faces Group L winner in R16
+  ['Winner Group L','3rd Group E/I/J/K'],     // right side: faces Mexico in R16
+  ['Winner Group H','Runner-up Group J'],     // right side: faces K/L runners-up in R16
+  ['Runner-up Group K','Runner-up Group L'], // right side: faces Group H winner in R16
+  ['Argentina','Runner-up Group H'],          // right side: faces Australia in R16
+  ['Australia','Runner-up Group G'],          // right side: faces Argentina in R16
+  ['Switzerland','3rd Group E/G/I/J'],        // right side: faces Group K winner in R16
+  ['Winner Group K','3rd Group D/E/I/L']     // right side: faces Switzerland in R16
 ];
 
-let setup = JSON.parse(localStorage.getItem('wc2026_bsetup') || 'null') || DEFAULT;
+const BRACKET_STORAGE_KEY = 'wc2026_bsetup';
+const BRACKET_LAYOUT_VERSION_KEY = 'wc2026_bsetup_version';
+const BRACKET_LAYOUT_VERSION = 2;
+
+function loadSetup() {
+  const storedSetup = JSON.parse(localStorage.getItem(BRACKET_STORAGE_KEY) || 'null');
+  const storedVersion = Number(localStorage.getItem(BRACKET_LAYOUT_VERSION_KEY) || '0');
+
+  if (Array.isArray(storedSetup) && storedSetup.length === DEFAULT.length && storedVersion >= BRACKET_LAYOUT_VERSION) {
+    return storedSetup;
+  }
+
+  localStorage.setItem(BRACKET_STORAGE_KEY, JSON.stringify(DEFAULT));
+  localStorage.setItem(BRACKET_LAYOUT_VERSION_KEY, String(BRACKET_LAYOUT_VERSION));
+  return DEFAULT;
+}
+
+let setup = loadSetup();
 let picks = {};
 let userName = '';
 
