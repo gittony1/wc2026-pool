@@ -8,14 +8,18 @@
  * More sheets are created automatically as needed:
  *   Results               — Round | Idx | Winner   (actual knockout outcomes)
  *   GroupAdvancers        — Team                   (the 32 real Round of 32 teams)
+ *   R32Setup              — Idx | TeamA | TeamB     (live Round of 32 matchups)
  *   BracketPicksReadable  — decoded bracket picks per person (Pool Admin menu)
  *
  * Deploy: paste this whole file over Code.gs, save, then
  * Deploy > Manage deployments > Edit (pencil) > Version: New version > Deploy.
  * Keep the same deployment so the existing web app URL keeps working.
  *
- * IMPORTANT: R32_SETUP below must be kept in sync with the DEFAULT array in
- * bracket.html — update both whenever the official Round of 32 matchups change.
+ * R32Setup auto-refreshes from ESPN (see refreshR32Setup_) — no manual edits
+ * needed as placeholder slots (1G, 3RD A/E/H/I/J, etc.) resolve to real teams.
+ * R32_SEED below is only the one-time bootstrap value used the first time the
+ * R32Setup sheet is created; after that the sheet is the source of truth.
+ * bracket.html independently fetches the same live setup via doGet?type=setup.
  */
 
 const GROUP_LETTERS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
@@ -29,8 +33,9 @@ const PREV = { r16:'r32', qf:'r16', sf:'qf', final:'sf' };
 const ROUND_COUNTS = { r32:16, r16:8, qf:4, sf:2, third:1, final:1 };
 const ROUND_POINTS = { r32:2, r16:4, qf:8, sf:16, third:8, final:32 };
 
-// Mirror of bracket.html's DEFAULT array — keep these two in sync.
-const R32_SETUP = [
+// One-time bootstrap for the R32Setup sheet — see file header. Not used again
+// once that sheet exists.
+const R32_SEED = [
   ['Germany','Paraguay'],
   ['France','Sweden'],
   ['South Africa','Canada'],
@@ -168,6 +173,11 @@ function doPost(e) {
 // ---------- Leaderboard ----------
 
 function doGet(e) {
+  if (e && e.parameter && e.parameter.type === 'setup') {
+    const setup = getR32Setup_();
+    return jsonOutput_(setup.map((pair, idx) => ({ idx, teamA: pair[0], teamB: pair[1] })));
+  }
+
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   ensureSchema_(sheet);
   const lastRow = sheet.getLastRow();
@@ -272,16 +282,16 @@ function refreshReadableBracketPicks() {
 
 // ---------- Bracket tree (mirrors bracket.html's getTeam/getLoser) ----------
 
-function getTeamServer_(round, idx, pos, results) {
-  if (round === 'r32') return (R32_SETUP[idx] || ['', ''])[pos] || '';
-  if (round === 'third') return getLoserServer_('sf', pos, results);
+function getTeamServer_(round, idx, pos, results, r32Setup) {
+  if (round === 'r32') return (r32Setup[idx] || ['', ''])[pos] || '';
+  if (round === 'third') return getLoserServer_('sf', pos, results, r32Setup);
   const prev = PREV[round];
   return results[`${prev}_${idx * 2 + pos}`] || '';
 }
 
-function getLoserServer_(round, idx, results) {
-  const t0 = getTeamServer_(round, idx, 0, results);
-  const t1 = getTeamServer_(round, idx, 1, results);
+function getLoserServer_(round, idx, results, r32Setup) {
+  const t0 = getTeamServer_(round, idx, 0, results, r32Setup);
+  const t1 = getTeamServer_(round, idx, 1, results, r32Setup);
   const winner = results[`${round}_${idx}`];
   if (!winner) return '';
   return winner === t0 ? t1 : t0;
@@ -297,6 +307,21 @@ function getResultsMap_() {
     });
   }
   return map;
+}
+
+function getR32Setup_() {
+  const sheet = getOrCreateSheet_('R32Setup', ['Idx', 'TeamA', 'TeamB']);
+  if (sheet.getLastRow() <= 1) {
+    const rows = R32_SEED.map((pair, idx) => [idx, pair[0], pair[1]]);
+    sheet.getRange(2, 1, rows.length, 3).setValues(rows);
+  }
+  const lastRow = sheet.getLastRow();
+  const setup = R32_SEED.map(pair => pair.slice());
+  sheet.getRange(2, 1, lastRow - 1, 3).getValues().forEach(r => {
+    const idx = Number(r[0]);
+    if (idx >= 0 && idx < setup.length) setup[idx] = [String(r[1] || ''), String(r[2] || '')];
+  });
+  return setup;
 }
 
 function getGroupAdvancers_() {
@@ -317,7 +342,60 @@ function getGroupAdvancers_() {
 
 function refreshResultsFromEspn() {
   refreshGroupAdvancers_();
+  refreshR32Setup_();
   refreshBracketResults_();
+}
+
+// ESPN shows still-undetermined Round of 32 sides as generic text like
+// "Group K Winner" or "Third Place Group A/E/H/I/J" — translate that into the
+// same placeholder-code notation bracket.html/R32_SEED already use, so a
+// fixture can be matched to our slot whether or not either side has resolved
+// to a real team name yet.
+function translateEspnPlaceholder_(name) {
+  if (!name) return '';
+  let m = name.match(/^Group ([A-L]) Winner$/);
+  if (m) return `1${m[1]}`;
+  m = name.match(/^Group ([A-L]) 2nd Place$/);
+  if (m) return `2${m[1]}`;
+  m = name.match(/^Third Place Group (.+)$/);
+  if (m) return `3RD ${m[1]}`;
+  return canonical_(name);
+}
+
+// Keep whichever side already matches our current TeamA in position A, so a
+// slot's left/right (top/bottom) assignment stays stable across refreshes.
+function alignPair_(fa, fb, ca, cb) {
+  if (fa === ca || fb === cb) return [fa, fb];
+  if (fa === cb || fb === ca) return [fb, fa];
+  return null;
+}
+
+function refreshR32Setup_() {
+  const sheet = getOrCreateSheet_('R32Setup', ['Idx', 'TeamA', 'TeamB']);
+  const current = getR32Setup_();
+
+  const res = UrlFetchApp.fetch(
+    'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260628-20260703',
+    { muteHttpExceptions: true }
+  );
+  const json = JSON.parse(res.getContentText());
+
+  (json.events || []).forEach(ev => {
+    const comp = ev.competitions && ev.competitions[0];
+    const competitors = comp && comp.competitors;
+    if (!competitors || competitors.length !== 2) return;
+
+    const fa = translateEspnPlaceholder_(competitors[0].team.displayName);
+    const fb = translateEspnPlaceholder_(competitors[1].team.displayName);
+
+    for (let idx = 0; idx < current.length; idx++) {
+      const [ca, cb] = current[idx];
+      const aligned = alignPair_(fa, fb, ca, cb);
+      if (aligned) { current[idx] = aligned; break; }
+    }
+  });
+
+  sheet.getRange(2, 1, current.length, 3).setValues(current.map((pair, idx) => [idx, pair[0], pair[1]]));
 }
 
 function refreshGroupAdvancers_() {
@@ -350,6 +428,7 @@ function refreshGroupAdvancers_() {
 function refreshBracketResults_() {
   const resultsSheet = getOrCreateSheet_('Results', ['Round', 'Idx', 'Winner']);
   const results = getResultsMap_();
+  const r32Setup = getR32Setup_();
 
   const res = UrlFetchApp.fetch(
     'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260628-20260720',
@@ -382,8 +461,8 @@ function refreshBracketResults_() {
       for (let idx = 0; idx < ROUND_COUNTS[round]; idx++) {
         const key = `${round}_${idx}`;
         if (results[key]) continue;
-        const t0 = getTeamServer_(round, idx, 0, results);
-        const t1 = getTeamServer_(round, idx, 1, results);
+        const t0 = getTeamServer_(round, idx, 0, results, r32Setup);
+        const t1 = getTeamServer_(round, idx, 1, results, r32Setup);
         if (!t0 || !t1) continue;
         const match = fixtures.find(f => f.teams.includes(t0) && f.teams.includes(t1));
         if (match) {

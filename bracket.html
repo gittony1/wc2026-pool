@@ -181,6 +181,7 @@ const BRACKET_STORAGE_KEY = 'wc2026_bsetup';
 const BRACKET_LAYOUT_VERSION_KEY = 'wc2026_bsetup_version';
 const BRACKET_LAYOUT_VERSION = 4;
 const BRACKET_CUSTOM_OVERRIDE_KEY = 'wc2026_bsetup_override';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYGdtHkwbD7lZRtk6Ct1gW2qqVlpVPy99BB0Ix9qq8nYvXaV4C0yB2rzliwNrTCod7/exec';
 
 function loadSetup() {
   const storedSetup = JSON.parse(localStorage.getItem(BRACKET_STORAGE_KEY) || 'null');
@@ -225,17 +226,33 @@ function hasCustomSetupOverride() {
   return localStorage.getItem(BRACKET_CUSTOM_OVERRIDE_KEY) === '1';
 }
 
-function refreshBracketFromOfficialSource() {
+async function refreshBracketFromOfficialSource() {
   if (hasCustomSetupOverride()) {
     setLiveStatus('Using your saved bracket setup');
     return;
   }
 
-  setup = DEFAULT.map(match => match.slice());
+  try {
+    const res = await fetch(SCRIPT_URL + '?type=setup');
+    const rows = await res.json();
+    if (!Array.isArray(rows) || rows.length !== DEFAULT.length) throw new Error('bad setup response');
+
+    const live = DEFAULT.map(match => match.slice());
+    rows.forEach(row => {
+      if (row.idx >= 0 && row.idx < live.length) {
+        live[row.idx] = [canonicalTeamName(row.teamA), canonicalTeamName(row.teamB)];
+      }
+    });
+    setup = live;
+    setLiveStatus('Live bracket synced from ESPN');
+  } catch (e) {
+    setup = DEFAULT.map(match => match.slice());
+    setLiveStatus('Using the official ESPN bracket layout');
+  }
+
   localStorage.setItem(BRACKET_STORAGE_KEY, JSON.stringify(setup));
   localStorage.setItem(BRACKET_LAYOUT_VERSION_KEY, String(BRACKET_LAYOUT_VERSION));
   if (document.getElementById('bracketUI') && document.getElementById('bracketUI').style.display !== 'none') render();
-  setLiveStatus('Using the official ESPN bracket layout');
 }
 
 // Bracket column layout:
@@ -440,8 +457,6 @@ function startBracket() {
   document.getElementById('bracketUI').style.display = '';
   render();
 }
-
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYGdtHkwbD7lZRtk6Ct1gW2qqVlpVPy99BB0Ix9qq8nYvXaV4C0yB2rzliwNrTCod7/exec';
 
 async function submitBracket() {
   if (Object.keys(picks).length < 32 || !userName.trim()) return;
