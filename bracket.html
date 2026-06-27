@@ -329,6 +329,8 @@ function render() {
       const t1 = getTeam(round, idx, 1);
       const winner = picks[`${round}_${idx}`] || '';
 
+      if (isFinal) html += `<div class="champ-wrap"><div class="col-label gold">Championship Match</div>`;
+
       html += `<div class="match${isFinal?' final-match':''}" data-round="${round}" data-idx="${idx}">`;
 
       if (isFinal && winner) {
@@ -347,6 +349,7 @@ function render() {
       }
 
       html += `</div>`;
+      if (isFinal) html += `</div>`;
     }
 
     html += `</div>`;
