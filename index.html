@@ -8,8 +8,8 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #07111f;
-  color: #e8edf2;
+  background: #eef1f6;
+  color: #1a2733;
   min-height: 100vh;
 }
 header {
@@ -18,92 +18,92 @@ header {
   text-align: center;
   border-bottom: 2px solid #c9a227;
 }
-header h1 { font-size: 20px; font-weight: 800; }
+header h1 { font-size: 20px; font-weight: 800; color: #fff; }
 header h1 .wc { color: #c9a227; }
-header p { font-size: 13px; color: #8fa8c0; margin-top: 4px; }
+header p { font-size: 13px; color: #cfe0d8; margin-top: 4px; }
 .container { max-width: 860px; margin: 0 auto; padding: 20px 16px 40px; }
 .container-wide { max-width: 1700px; }
 .container-medium { max-width: 1000px; }
-.card { background: #0b1d2e; border: 1px solid #1a3350; border-radius: 12px; padding: 18px; margin-bottom: 16px; }
-.card-title { font-size: 13px; font-weight: 800; color: #c9a227; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.6px; }
+.card { background: #ffffff; border: 1px solid #dde3ea; border-radius: 12px; padding: 18px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(20,30,45,0.05); }
+.card-title { font-size: 13px; font-weight: 800; color: #9a7b14; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.6px; }
 input[type="text"] {
-  background: #091e36; border: 1px solid #1a3350; border-radius: 8px;
-  color: #e8edf2; padding: 10px 14px; font-size: 14px; outline: none;
+  background: #f1f4f8; border: 1px solid #dde3ea; border-radius: 8px;
+  color: #1a2733; padding: 10px 14px; font-size: 14px; outline: none;
   width: 100%; transition: border 0.15s;
 }
 input[type="text"]:focus { border-color: #c9a227; }
 .alert { padding: 10px 14px; border-radius: 8px; font-size: 13px; line-height: 1.5; margin-bottom: 14px; }
-.alert-info { background: #091e36; border: 1px solid #1a4060; color: #7aadcc; }
+.alert-info { background: #eaf3fb; border: 1px solid #bcdcf0; color: #2f6690; }
 .progress-sticky {
   position: sticky; top: 0; z-index: 50;
-  background: #0b1d2e; border-bottom: 1px solid #1a3350;
+  background: #ffffff; border-bottom: 1px solid #dde3ea;
   padding: 10px 16px; margin: -18px -18px 16px;
   display: flex; align-items: center; gap: 14px;
 }
-.progress-count { font-size: 26px; font-weight: 800; color: #c9a227; line-height: 1; }
-.progress-label { font-size: 11px; color: #5a7a96; }
-.progress-track { flex: 1; height: 6px; background: #1a3350; border-radius: 3px; }
+.progress-count { font-size: 26px; font-weight: 800; color: #9a7b14; line-height: 1; }
+.progress-label { font-size: 11px; color: #64748b; }
+.progress-track { flex: 1; height: 6px; background: #dde3ea; border-radius: 3px; }
 .progress-fill { height: 100%; background: #c9a227; border-radius: 3px; transition: width 0.2s; }
-.progress-remain { font-size: 13px; color: #5a7a96; white-space: nowrap; }
-.progress-remain.done { color: #27a14a; font-weight: 700; }
+.progress-remain { font-size: 13px; color: #64748b; white-space: nowrap; }
+.progress-remain.done { color: #1c8a3c; font-weight: 700; }
 .group-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
-.group-box { background: #091e36; border: 1px solid #1a3350; border-radius: 8px; padding: 10px; }
-.group-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #5a7a96; margin-bottom: 6px; }
+.group-box { background: #f1f4f8; border: 1px solid #dde3ea; border-radius: 8px; padding: 10px; }
+.group-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 6px; }
 .team-chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .chip {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 5px 10px; border-radius: 16px; font-size: 12px;
   cursor: pointer; transition: all 0.15s;
-  border: 1px solid #1a3350; background: #0b1d2e; color: #8fa8c0;
+  border: 1px solid #dde3ea; background: #ffffff; color: #5b6b7d;
   user-select: none;
 }
-.chip:hover:not(.disabled) { border-color: #c9a227; color: #fff; }
-.chip.picked { background: #0f3d24; border-color: #27a14a; color: #fff; font-weight: 600; }
-.chip.disabled { opacity: 0.35; cursor: not-allowed; }
+.chip:hover:not(.disabled) { border-color: #c9a227; color: #1a2733; }
+.chip.picked { background: #1e7a40; border-color: #1e7a40; color: #fff; font-weight: 600; }
+.chip.disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-submit {
   width: 100%; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 800;
-  cursor: pointer; border: none; background: #c9a227; color: #07111f;
+  cursor: pointer; border: none; background: #c9a227; color: #1a2733;
   transition: all 0.15s;
 }
 .btn-submit:hover:not(:disabled) { background: #dab83a; }
-.btn-submit:disabled { opacity: 0.35; cursor: not-allowed; }
-#submitError { color: #f07070; font-size: 13px; margin-top: 10px; text-align: center; }
-.tab-btn { padding: 12px 20px; background: none; border: none; border-bottom: 3px solid transparent; color: #5a7a96; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-.tab-btn:hover { color: #c8d8e8; }
-.tab-btn.active { color: #c9a227; border-bottom-color: #c9a227; }
-.ldr-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #0d2236; font-size: 13px; }
+.btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+#submitError { color: #c0392b; font-size: 13px; margin-top: 10px; text-align: center; }
+.tab-btn { padding: 12px 20px; background: none; border: none; border-bottom: 3px solid transparent; color: #64748b; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.tab-btn:hover { color: #1a2733; }
+.tab-btn.active { color: #9a7b14; border-bottom-color: #c9a227; }
+.ldr-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e7ebf0; font-size: 13px; }
 .ldr-row:last-child { border-bottom: none; }
-.ldr-rank { width: 28px; height: 28px; border-radius: 50%; background: #0d2236; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; margin-right: 10px; }
-.ldr-rank.gold { background: #c9a227; color: #07111f; }
-.ldr-rank.silver { background: #9aa0a8; color: #07111f; }
+.ldr-rank { width: 28px; height: 28px; border-radius: 50%; background: #e7ebf0; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; margin-right: 10px; }
+.ldr-rank.gold { background: #c9a227; color: #1a2733; }
+.ldr-rank.silver { background: #9aa0a8; color: #1a2733; }
 .ldr-rank.bronze { background: #b07030; color: #fff; }
-.ldr-pts { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #0d2236; color: #5a7a96; }
-.ldr-empty { text-align: center; padding: 24px; color: #5a7a96; font-size: 13px; }
-.score-rule { background: #091e36; border: 1px solid #1a3350; border-radius: 8px; padding: 10px 12px; text-align: center; }
-.score-round { font-size: 11px; color: #5a7a96; font-weight: 600; margin-bottom: 4px; }
-.score-pts { font-size: 20px; font-weight: 800; color: #c9a227; }
-.score-note { font-size: 10px; color: #3a5a76; margin-top: 2px; }
+.ldr-pts { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #e7ebf0; color: #64748b; }
+.ldr-empty { text-align: center; padding: 24px; color: #64748b; font-size: 13px; }
+.score-rule { background: #f1f4f8; border: 1px solid #dde3ea; border-radius: 8px; padding: 10px 12px; text-align: center; }
+.score-round { font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 4px; }
+.score-pts { font-size: 20px; font-weight: 800; color: #9a7b14; }
+.score-note { font-size: 10px; color: #8a96a3; margin-top: 2px; }
 .timeline { display: flex; flex-direction: column; gap: 2px; }
-.tl-row { display: flex; align-items: center; gap: 12px; padding: 12px 10px; border-radius: 8px; border-left: 3px solid #1a3350; background: #091e36; margin-bottom: 6px; }
-.tl-final { border-left-color: #c9a227; background: #0c1e10; }
-.tl-date { font-size: 11px; color: #5a7a96; font-weight: 600; min-width: 90px; }
+.tl-row { display: flex; align-items: center; gap: 12px; padding: 12px 10px; border-radius: 8px; border-left: 3px solid #dde3ea; background: #f1f4f8; margin-bottom: 6px; }
+.tl-final { border-left-color: #c9a227; background: #fdf6e0; }
+.tl-date { font-size: 11px; color: #64748b; font-weight: 600; min-width: 90px; }
 .tl-info { flex: 1; }
-.tl-label { font-size: 14px; font-weight: 700; color: #e8edf2; }
-.tl-final .tl-label { color: #c9a227; }
-.tl-sub { font-size: 11px; color: #3a5a76; margin-top: 2px; }
-.tl-pts { font-size: 13px; font-weight: 800; color: #c9a227; white-space: nowrap; text-align: right; }
-.tl-pts span { display: block; font-size: 10px; font-weight: 400; color: #3a5a76; }
+.tl-label { font-size: 14px; font-weight: 700; color: #1a2733; }
+.tl-final .tl-label { color: #9a7b14; }
+.tl-sub { font-size: 11px; color: #8a96a3; margin-top: 2px; }
+.tl-pts { font-size: 13px; font-weight: 800; color: #9a7b14; white-space: nowrap; text-align: right; }
+.tl-pts span { display: block; font-size: 10px; font-weight: 400; color: #8a96a3; }
 .std-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-.std-group { background: #091e36; border: 1px solid #1a3350; border-radius: 8px; padding: 12px; }
-.std-group-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #5a7a96; margin-bottom: 8px; }
+.std-group { background: #f1f4f8; border: 1px solid #dde3ea; border-radius: 8px; padding: 12px; }
+.std-group-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; margin-bottom: 8px; }
 table.std-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-table.std-table th { text-align: center; color: #3a5a76; font-size: 10px; font-weight: 700; padding: 3px 2px; }
+table.std-table th { text-align: center; color: #8a96a3; font-size: 10px; font-weight: 700; padding: 3px 2px; }
 table.std-table th:first-child { text-align: left; }
-table.std-table td { padding: 4px 2px; text-align: center; border-top: 1px solid #0d2236; }
+table.std-table td { padding: 4px 2px; text-align: center; border-top: 1px solid #e7ebf0; }
 table.std-table td:first-child { text-align: left; display: flex; align-items: center; gap: 6px; }
 .std-team-logo { width: 16px; height: 16px; object-fit: contain; flex-shrink: 0; }
 .std-team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
-.std-pts { font-weight: 800; color: #c9a227; }
+.std-pts { font-weight: 800; color: #9a7b14; }
 
 /* Thank you screen */
 #thankYou {
@@ -111,16 +111,16 @@ table.std-table td:first-child { text-align: left; display: flex; align-items: c
   padding: 48px 20px; max-width: 560px; margin: 0 auto;
 }
 #thankYou .big { font-size: 56px; margin-bottom: 12px; }
-#thankYou h2 { font-size: 22px; font-weight: 800; color: #c9a227; margin-bottom: 8px; }
-#thankYou .sub { color: #8fa8c0; font-size: 14px; }
+#thankYou h2 { font-size: 22px; font-weight: 800; color: #9a7b14; margin-bottom: 8px; }
+#thankYou .sub { color: #5b6b7d; font-size: 14px; }
 .picks-summary {
-  background: #0b1d2e; border: 1px solid #1a3350; border-radius: 10px;
+  background: #ffffff; border: 1px solid #dde3ea; border-radius: 10px;
   padding: 16px; margin-top: 20px; text-align: left;
 }
-.picks-summary-title { font-size: 11px; font-weight: 800; color: #c9a227; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
-.summary-group { font-size: 13px; padding: 5px 0; border-bottom: 1px solid #0d2236; }
+.picks-summary-title { font-size: 11px; font-weight: 800; color: #9a7b14; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+.summary-group { font-size: 13px; padding: 5px 0; border-bottom: 1px solid #e7ebf0; }
 .summary-group:last-child { border-bottom: none; }
-.summary-group strong { color: #5a7a96; font-size: 11px; display: inline-block; width: 60px; }
+.summary-group strong { color: #64748b; font-size: 11px; display: inline-block; width: 60px; }
 
 @media (max-width: 520px) {
   .group-grid { grid-template-columns: 1fr 1fr; }
@@ -130,7 +130,7 @@ table.std-table td:first-child { text-align: left; display: flex; align-items: c
 </head>
 <body>
 
-<nav style="background:#0b1d2e;border-bottom:1px solid #1a3350;display:flex;">
+<nav style="background:#ffffff;border-bottom:1px solid #dde3ea;display:flex;">
   <button class="tab-btn active" onclick="showTab('picks',this)">📋 Make Picks</button>
   <button class="tab-btn" onclick="showTab('leaderboard',this)">🏆 Leaderboard</button>
   <button class="tab-btn" onclick="showTab('schedule',this)">📅 Schedule & Rules</button>
@@ -177,8 +177,8 @@ table.std-table td:first-child { text-align: left; display: flex; align-items: c
   <div class="big">🏆</div>
   <h2>You're in!</h2>
   <p class="sub" id="tyName"></p>
-  <p class="sub" style="margin-top:4px;font-size:12px;color:#3a5a76;">Picks are locked. Good luck!</p>
-  <button onclick="startOver()" style="margin-top:16px;background:none;border:1px solid #1a3350;color:#5a7a96;padding:7px 16px;border-radius:8px;font-size:12px;cursor:pointer;">Not you? Start over</button>
+  <p class="sub" style="margin-top:4px;font-size:12px;color:#8a96a3;">Picks are locked. Good luck!</p>
+  <button onclick="startOver()" style="margin-top:16px;background:none;border:1px solid #dde3ea;color:#64748b;padding:7px 16px;border-radius:8px;font-size:12px;cursor:pointer;">Not you? Start over</button>
   <div class="picks-summary">
     <div class="picks-summary-title">Your picks</div>
     <div id="tyPicks"></div>
@@ -194,12 +194,12 @@ table.std-table td:first-child { text-align: left; display: flex; align-items: c
     <div class="card">
       <div class="card-title"> Official Knockout Bracket</div>
       <p class="muted" style="margin-bottom:12px;font-size:13px;">Use the embedded bracket below to make your knockout-stage picks through the champion.</p>
-      <iframe src="bracket.html" style="width:100%;min-height:1050px;border:1px solid #1a3350;border-radius:12px;background:#07111f;" title="World Cup 2026 Knockout Bracket"></iframe>
+      <iframe src="bracket.html" style="width:100%;min-height:1050px;border:1px solid #dde3ea;border-radius:12px;background:#eef1f6;" title="World Cup 2026 Knockout Bracket"></iframe>
     </div>
   </div>
 
   <div class="container">
-    <div id="deadlinePassed" style="display:none;background:#2a0f0f;border:1px solid #5a1010;color:#f07070;padding:12px 14px;border-radius:8px;font-size:13px;text-align:center;margin-bottom:10px;">
+    <div id="deadlinePassed" style="display:none;background:#fdecea;border:1px solid #f1b9b2;color:#c0392b;padding:12px 14px;border-radius:8px;font-size:13px;text-align:center;margin-bottom:10px;">
       ⏱️ The group stage picks deadline (Thursday June 11 EOD) has passed. Submissions are closed.
     </div>
     <button class="btn-submit" id="submitBtn" disabled onclick="submitPicks()">
@@ -259,7 +259,7 @@ function renderGrid() {
     const gp = picks[g] || [];
     const full = gp.length >= 3;
     html += `<div class="group-box">
-      <div class="group-label">Group ${g} <span style="font-weight:400;color:${full?'#c9a227':'#3a5a76'}">(${gp.length}/3)</span></div>
+      <div class="group-label">Group ${g} <span style="font-weight:400;color:${full?'#9a7b14':'#8a96a3'}">(${gp.length}/3)</span></div>
       <div class="team-chips">`;
     for (const t of teams) {
       const picked = gp.includes(t);
@@ -409,7 +409,7 @@ async function loadLeaderboard() {
       el.innerHTML = '<div class="ldr-empty">No submissions yet. Be the first!</div>';
       return;
     }
-    let html = `<div style="color:#5a7a96;font-size:12px;margin-bottom:12px;">${participants.length} player${participants.length!==1?'s':''} in the pool</div>`;
+    let html = `<div style="color:#64748b;font-size:12px;margin-bottom:12px;">${participants.length} player${participants.length!==1?'s':''} in the pool</div>`;
     html += `<div style="overflow-x:auto;"><table class="std-table" style="min-width:920px;">
       <thead><tr>
         <th style="text-align:left;">Rank</th><th style="text-align:left;">Name</th>

@@ -6,22 +6,22 @@
 <title>World Cup 2026 Knockout Bracket</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #07111f; color: #e8edf2; min-height: 100vh; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #eef1f6; color: #1a2733; min-height: 100vh; }
 header { background: linear-gradient(135deg, #0f3d24, #0a2318); padding: 14px 20px; text-align: center; border-bottom: 2px solid #c9a227; }
-header h1 { font-size: 18px; font-weight: 800; }
+header h1 { font-size: 18px; font-weight: 800; color: #fff; }
 .wc { color: #c9a227; }
 .test-badge { background: #8c1f1f; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
-input[type="text"], input[type="password"] { background: #091e36; border: 1px solid #1a3350; border-radius: 8px; color: #e8edf2; padding: 9px 13px; font-size: 13px; outline: none; width: 100%; transition: border 0.15s; }
+input[type="text"], input[type="password"] { background: #f1f4f8; border: 1px solid #dde3ea; border-radius: 8px; color: #1a2733; padding: 9px 13px; font-size: 13px; outline: none; width: 100%; transition: border 0.15s; }
 input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; }
 .btn { display: block; width: 100%; padding: 11px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; }
-.btn-gold { background: #c9a227; color: #07111f; }
+.btn-gold { background: #c9a227; color: #1a2733; }
 .btn-gold:hover:not(:disabled) { background: #dab83a; }
-.btn-gold:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-gold:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-green { background: #1e7a40; color: #fff; }
 .btn-green:hover { background: #25924d; }
-.card { background: #0b1d2e; border: 1px solid #1a3350; border-radius: 12px; padding: 18px; margin-bottom: 14px; }
-.card-title { font-size: 12px; font-weight: 800; color: #c9a227; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 14px; }
-.muted { color: #5a7a96; font-size: 13px; }
+.card { background: #ffffff; border: 1px solid #dde3ea; border-radius: 12px; padding: 18px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(20,30,45,0.05); }
+.card-title { font-size: 12px; font-weight: 800; color: #9a7b14; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 14px; }
+.muted { color: #64748b; font-size: 13px; }
 
 /* Name screen */
 #nameScreen { max-width: 380px; margin: 48px auto; padding: 0 20px; }
@@ -29,13 +29,13 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 #nameScreen input { margin-bottom: 10px; }
 
 /* Progress bar */
-#progressBar { background: #0b1d2e; border-bottom: 1px solid #1a3350; padding: 10px 20px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 50; }
-.prog-num { font-size: 22px; font-weight: 800; color: #c9a227; line-height: 1; }
-.prog-label { font-size: 11px; color: #5a7a96; }
-.prog-track { flex: 1; height: 5px; background: #1a3350; border-radius: 3px; }
+#progressBar { background: #ffffff; border-bottom: 1px solid #dde3ea; padding: 10px 20px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 50; }
+.prog-num { font-size: 22px; font-weight: 800; color: #9a7b14; line-height: 1; }
+.prog-label { font-size: 11px; color: #64748b; }
+.prog-track { flex: 1; height: 5px; background: #dde3ea; border-radius: 3px; }
 .prog-fill { height: 100%; background: #c9a227; border-radius: 3px; transition: width 0.2s; }
-.prog-remain { font-size: 12px; color: #5a7a96; white-space: nowrap; }
-.prog-remain.done { color: #27a14a; font-weight: 700; }
+.prog-remain { font-size: 12px; color: #64748b; white-space: nowrap; }
+.prog-remain.done { color: #1c8a3c; font-weight: 700; }
 
 /* Bracket */
 #bracketScroll { overflow-x: auto; padding: 16px; }
@@ -43,46 +43,46 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 #bracketLines { position: absolute; top: 0; left: 0; z-index: -1; pointer-events: none; }
 .b-col { display: flex; flex-direction: column; gap: 4px; }
 .b-col-inner { display: flex; flex-direction: column; justify-content: space-around; height: 600px; }
-.col-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #5a7a96; text-align: center; padding-bottom: 8px; white-space: nowrap; }
-.col-label.gold { color: #c9a227; }
+.col-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; text-align: center; padding-bottom: 8px; white-space: nowrap; }
+.col-label.gold { color: #9a7b14; }
 
 /* Match cards */
-.match { background: #0b1d2e; border: 1px solid #1a3350; border-radius: 7px; overflow: hidden; width: 138px; }
+.match { background: #ffffff; border: 1px solid #dde3ea; border-radius: 7px; overflow: hidden; width: 138px; box-shadow: 0 1px 2px rgba(20,30,45,0.05); }
 .match.final-match { border-color: #c9a227; width: 158px; }
-.team-slot { display: block; width: 100%; padding: 7px 8px; text-align: left; font-size: 11px; cursor: pointer; border: none; color: #8fa8c0; background: none; border-bottom: 1px solid #0d2236; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.1s, color 0.1s; }
+.team-slot { display: block; width: 100%; padding: 7px 8px; text-align: left; font-size: 11px; cursor: pointer; border: none; color: #5b6b7d; background: none; border-bottom: 1px solid #e7ebf0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.1s, color 0.1s; }
 .team-slot:last-child { border-bottom: none; }
-.team-slot:hover { background: #0f2a40; color: #e8edf2; }
-.team-slot.picked { background: #0f3d24 !important; color: #fff !important; font-weight: 700; }
-.team-slot.tbd { color: #2a3f54; font-style: italic; cursor: default; }
+.team-slot:hover { background: #eef4fa; color: #1a2733; }
+.team-slot.picked { background: #1e7a40 !important; color: #fff !important; font-weight: 700; }
+.team-slot.tbd { color: #c3cad3; font-style: italic; cursor: default; }
 .team-slot.tbd:hover { background: none; }
-.champ-slot { display: block; padding: 12px 10px; text-align: center; font-size: 12px; font-weight: 800; color: #c9a227; }
+.champ-slot { display: block; padding: 12px 10px; text-align: center; font-size: 12px; font-weight: 800; color: #9a7b14; }
 
 /* Divider */
-.b-divider { width: 1px; background: #1a3350; margin: 0 2px; align-self: stretch; margin-top: 29px; }
+.b-divider { width: 1px; background: #dde3ea; margin: 0 2px; align-self: stretch; margin-top: 29px; }
 
 /* Third place match */
 .third-place { margin-top: 28px; }
-.third-label { color: #c98a3a; }
-.match.third-match { width: 158px; border-color: #4a3318; }
+.third-label { color: #b06a16; }
+.match.third-match { width: 158px; border-color: #e0c89a; }
 
 /* Submit */
 #submitArea { max-width: 380px; margin: 16px auto; padding: 0 20px 40px; }
-#submitError { color: #f07070; font-size: 13px; margin-top: 8px; text-align: center; }
+#submitError { color: #c0392b; font-size: 13px; margin-top: 8px; text-align: center; }
 
 /* Thank you */
 #thankYou { display: none; text-align: center; padding: 48px 20px; max-width: 480px; margin: 0 auto; }
 #thankYou .big { font-size: 52px; }
-#thankYou h2 { font-size: 22px; font-weight: 800; color: #c9a227; margin: 12px 0 8px; }
-#thankYou p { color: #8fa8c0; font-size: 14px; }
-.start-over { margin-top: 16px; background: none; border: 1px solid #1a3350; color: #5a7a96; padding: 7px 16px; border-radius: 8px; font-size: 12px; cursor: pointer; }
+#thankYou h2 { font-size: 22px; font-weight: 800; color: #9a7b14; margin: 12px 0 8px; }
+#thankYou p { color: #5b6b7d; font-size: 14px; }
+.start-over { margin-top: 16px; background: none; border: 1px solid #dde3ea; color: #64748b; padding: 7px 16px; border-radius: 8px; font-size: 12px; cursor: pointer; }
 
 /* Commissioner */
-#commToggle { display: block; text-align: center; margin: 10px auto; font-size: 12px; color: #3a5a76; cursor: pointer; background: none; border: none; text-decoration: underline; padding: 8px; }
+#commToggle { display: block; text-align: center; margin: 10px auto; font-size: 12px; color: #8a96a3; cursor: pointer; background: none; border: none; text-decoration: underline; padding: 8px; }
 #commArea { max-width: 580px; margin: 0 auto; padding: 0 16px 40px; display: none; }
 .match-setup-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; margin-bottom: 6px; }
-.match-setup-row span { text-align: center; font-size: 11px; color: #3a5a76; }
+.match-setup-row span { text-align: center; font-size: 11px; color: #8a96a3; }
 .match-setup-row input { font-size: 12px; padding: 6px 10px; }
-.match-num-label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #3a5a76; margin: 10px 0 4px; }
+.match-num-label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #8a96a3; margin: 10px 0 4px; }
 </style>
 </head>
 <body>
@@ -90,7 +90,7 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 <header>
   <h1>⚽ <span class="wc">World Cup 2026</span> Knockout Bracket</h1>
 </header>
-<div id="liveStatus" style="text-align:center;padding:8px 20px 0;font-size:12px;color:#7aadcc;">Loading latest group results…</div>
+<div id="liveStatus" style="text-align:center;padding:8px 20px 0;font-size:12px;color:#2f6690;">Loading latest group results…</div>
 <p class="muted" style="text-align:center;padding:14px 20px;">Official Round of 32 pairings follow the ESPN bracket layout for accurate positioning.</p>
 
 <!-- Name entry -->
@@ -121,7 +121,7 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
   <div class="big">🏆</div>
   <h2>Bracket locked in!</h2>
   <p id="tyName"></p>
-  <p style="margin-top:4px;font-size:12px;color:#3a5a76;">Good luck!</p>
+  <p style="margin-top:4px;font-size:12px;color:#8a96a3;">Good luck!</p>
   <button class="start-over" onclick="startOver()">Not you? Start over</button>
 </div>
 
@@ -134,7 +134,7 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
     <div id="setupForm"></div>
     <div style="margin-top:14px;">
       <button class="btn btn-green" onclick="saveBracket()" style="display:inline-block;width:auto;padding:9px 20px;">Save Bracket</button>
-      <span id="setupMsg" style="font-size:12px;color:#6ec98a;margin-left:12px;"></span>
+      <span id="setupMsg" style="font-size:12px;color:#1c8a3c;margin-left:12px;"></span>
     </div>
   </div>
 </div>
@@ -421,7 +421,7 @@ function drawConnectors() {
       const ay = a.top + a.height / 2 - containerRect.top;
       const by = b.top + b.height / 2 - containerRect.top;
       const advanced = matchEl.querySelector('.team-slot.picked');
-      const stroke = advanced ? '#c9a227' : '#28435e';
+      const stroke = advanced ? '#c9a227' : '#c7ced7';
 
       paths += `<path d="M ${exitX} ${ay} H ${midX} V ${by} H ${entryX}" fill="none" stroke="${stroke}" stroke-width="2"/>`;
     });
