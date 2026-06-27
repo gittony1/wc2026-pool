@@ -10,7 +10,6 @@ html { color-scheme: light; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #eef1f6; color: #1a2733; min-height: 100vh; }
 header { background: linear-gradient(135deg, #0f3d24, #0a2318); padding: 14px 20px; text-align: center; border-bottom: 2px solid #c9a227; }
 header h1 { font-size: 18px; font-weight: 800; color: #fff; }
-.wc { color: #c9a227; }
 .test-badge { background: #8c1f1f; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
 input[type="text"], input[type="password"] { background: #f1f4f8; border: 1px solid #dde3ea; border-radius: 8px; color: #1a2733; padding: 9px 13px; font-size: 13px; outline: none; width: 100%; transition: border 0.15s; }
 input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; }
@@ -89,7 +88,7 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 <body>
 
 <header>
-  <h1>⚽ <span class="wc">World Cup 2026</span> Knockout Bracket</h1>
+  <h1>🏆 Knockout Bracket</h1>
 </header>
 <div id="liveStatus" style="text-align:center;padding:8px 20px 0;font-size:12px;color:#2f6690;">Loading latest group results…</div>
 <p class="muted" style="text-align:center;padding:14px 20px;">Official Round of 32 pairings follow the ESPN bracket layout for accurate positioning.</p>
@@ -542,6 +541,14 @@ if (saved) {
     document.getElementById('tyName').textContent = `Thanks, ${userName}!`;
   } catch(e) {}
 }
+
+// Tell the parent page (index.html) how tall we are so it can size the
+// iframe to fit, instead of the iframe getting its own internal scrollbar.
+function reportHeight() {
+  window.parent.postMessage({ type: 'wc2026-bracket-height', height: document.documentElement.scrollHeight }, '*');
+}
+new ResizeObserver(reportHeight).observe(document.body);
+window.addEventListener('load', reportHeight);
 </script>
 </body>
 </html>
