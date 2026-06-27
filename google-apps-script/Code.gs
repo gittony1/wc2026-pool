@@ -5,9 +5,10 @@
  * script's behavior) holds one row per participant:
  *   Timestamp | Name | Group A..L | Total | BracketPicks (JSON) | BracketSubmittedAt
  *
- * Two more sheets are created automatically:
- *   Results         — Round | Idx | Winner   (actual knockout outcomes)
- *   GroupAdvancers  — Team                   (the 32 real Round of 32 teams)
+ * More sheets are created automatically as needed:
+ *   Results               — Round | Idx | Winner   (actual knockout outcomes)
+ *   GroupAdvancers        — Team                   (the 32 real Round of 32 teams)
+ *   BracketPicksReadable  — decoded bracket picks per person (Pool Admin menu)
  *
  * Deploy: paste this whole file over Code.gs, save, then
  * Deploy > Manage deployments > Edit (pencil) > Version: New version > Deploy.
@@ -72,6 +73,7 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Pool Admin')
     .addItem('🔄 Refresh Results from ESPN', 'refreshResultsFromEspn')
+    .addItem('📋 Refresh Readable Bracket Picks', 'refreshReadableBracketPicks')
     .addToUi();
 }
 
@@ -219,6 +221,53 @@ function computeBracketBreakdown_(picks, results) {
     }
   });
   return breakdown;
+}
+
+// ---------- Readable bracket picks (Pool Admin menu) ----------
+// BracketPicks is stored as raw JSON for scoring; this decodes it into a
+// plain-language sheet so you can actually read what everyone picked.
+
+const READABLE_ROUNDS = ['r32', 'r16', 'qf', 'sf', 'third', 'final'];
+const READABLE_HEADERS = ['Name', 'R32 Picks', 'R16 Picks', 'QF Picks', 'SF Picks', '3rd Place Pick', 'Champion Pick'];
+
+function refreshReadableBracketPicks() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  ensureSchema_(sheet);
+  const outSheet = getOrCreateSheet_('BracketPicksReadable', READABLE_HEADERS);
+
+  const outLastRow = outSheet.getLastRow();
+  if (outLastRow > 1) {
+    outSheet.getRange(2, 1, outLastRow - 1, READABLE_HEADERS.length).clearContent();
+  }
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return;
+
+  const numCols = Math.max(sheet.getLastColumn(), HEADERS.length);
+  const rows = sheet.getRange(2, 1, lastRow - 1, numCols).getValues();
+
+  const out = [];
+  rows.forEach(r => {
+    const name = r[1];
+    if (!name) return;
+    let bracketPicks = {};
+    try { bracketPicks = r[15] ? JSON.parse(r[15]) : {}; } catch (err) { bracketPicks = {}; }
+    if (Object.keys(bracketPicks).length === 0) return; // no bracket submission yet
+
+    const cols = READABLE_ROUNDS.map(round => {
+      const list = [];
+      for (let idx = 0; idx < ROUND_COUNTS[round]; idx++) {
+        const v = bracketPicks[`${round}_${idx}`];
+        if (v) list.push(v);
+      }
+      return list.join(', ');
+    });
+    out.push([name, ...cols]);
+  });
+
+  if (out.length) {
+    outSheet.getRange(2, 1, out.length, READABLE_HEADERS.length).setValues(out);
+  }
 }
 
 // ---------- Bracket tree (mirrors bracket.html's getTeam/getLoser) ----------
