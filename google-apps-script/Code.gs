@@ -330,10 +330,14 @@ function refreshGroupAdvancers_() {
   (json.children || []).forEach(group => {
     const entries = (group.standings && group.standings.entries) || [];
     entries.forEach(entry => {
-      const note = (entry.note && entry.note.description) || '';
+      // Only trust ESPN's explicit "advanced" stat (0 or 1) — note.description
+      // text like "Best 8 advance" describes a team still in contention for a
+      // 3rd-place slot, not a confirmed result, even though it contains the
+      // word "advance".
       const advancedStat = (entry.stats || []).find(s => s.name === 'advanced');
-      const advanced = /advance/i.test(note) || (advancedStat && advancedStat.value === 1);
-      if (advanced) advancers.push(canonical_(entry.team.displayName));
+      if (advancedStat && advancedStat.value === 1) {
+        advancers.push(canonical_(entry.team.displayName));
+      }
     });
   });
 
