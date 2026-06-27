@@ -84,7 +84,8 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 <header>
   <h1>⚽ <span class="wc">World Cup 2026</span> Knockout Bracket</h1>
 </header>
-<p class="muted" style="text-align:center;padding:14px 20px;">Official Round of 32 pairings are based on the FIFA 2026 knockout stage bracket.</p>
+<div id="liveStatus" style="text-align:center;padding:8px 20px 0;font-size:12px;color:#7aadcc;">Loading latest group results…</div>
+<p class="muted" style="text-align:center;padding:14px 20px;">Official Round of 32 pairings are based on the FIFA 2026 knockout stage bracket and update live as group results come in.</p>
 
 <!-- Name screen -->
 <div id="nameScreen">
@@ -173,6 +174,106 @@ const DEFAULT = [
 let setup = JSON.parse(localStorage.getItem('wc2026_bsetup') || 'null') || DEFAULT;
 let picks = {};
 let userName = '';
+
+const ESPN_STANDINGS_URL = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
+const TEAM_NAME_ALIASES = {
+  'Bosnia-Herzegovina': 'Bosnia and Herzegovina',
+  'Bosnia & Herzegovina': 'Bosnia and Herzegovina',
+  'Czechia': 'Czech Republic',
+  'USA': 'United States',
+  'U.S.': 'United States'
+};
+
+function canonicalTeamName(name) {
+  if (!name) return '';
+  const trimmed = String(name).trim();
+  return TEAM_NAME_ALIASES[trimmed] || trimmed;
+}
+
+function setLiveStatus(message) {
+  const el = document.getElementById('liveStatus');
+  if (el) el.textContent = message;
+}
+
+function shouldApplyLiveUpdates() {
+  return setup.some(match => match.some(team => typeof team === 'string' && /^(Winner|Runner-up|3rd)/.test(team)))
+    || JSON.stringify(setup) === JSON.stringify(DEFAULT);
+}
+
+function getGroupStandings(groupData, groupLetter, rankIndex) {
+  const group = groupData[groupLetter.toUpperCase()];
+  if (!group || !group[rankIndex]) return '';
+  return group[rankIndex].team || '';
+}
+
+function resolveLiveTeamName(teamName, groupData) {
+  if (typeof teamName !== 'string') return teamName;
+  const normalized = teamName.trim();
+
+  const winnerMatch = normalized.match(/^Winner Group ([A-L])$/i);
+  if (winnerMatch) return getGroupStandings(groupData, winnerMatch[1], 0) || normalized;
+
+  const runnerUpMatch = normalized.match(/^Runner-up Group ([A-L])$/i);
+  if (runnerUpMatch) return getGroupStandings(groupData, runnerUpMatch[1], 1) || normalized;
+
+  const thirdMatch = normalized.match(/^3rd Group ([A-L](?:\/[A-L])*)$/i);
+  if (thirdMatch) {
+    const groupLetters = thirdMatch[1].split('/').map(g => g.trim().toUpperCase());
+    const candidates = groupLetters
+      .map(letter => {
+        const team = getGroupStandings(groupData, letter, 2);
+        return team ? { team, points: groupData[letter]?.[2]?.points || 0 } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => (b.points || 0) - (a.points || 0));
+    return candidates[0]?.team || normalized;
+  }
+
+  return normalized;
+}
+
+function applyLiveStandingsToSetup(groupData) {
+  if (!shouldApplyLiveUpdates()) return false;
+  const updatedSetup = setup.map(match => match.map(team => resolveLiveTeamName(team, groupData)));
+  if (JSON.stringify(updatedSetup) !== JSON.stringify(setup)) {
+    setup = updatedSetup;
+    if (typeof localStorage !== 'undefined') localStorage.setItem('wc2026_bsetup', JSON.stringify(setup));
+    if (document.getElementById('bracketUI') && document.getElementById('bracketUI').style.display !== 'none') render();
+    return true;
+  }
+  return false;
+}
+
+async function refreshBracketFromLiveResults() {
+  try {
+    const res = await fetch(ESPN_STANDINGS_URL);
+    if (!res.ok) throw new Error('standings request failed');
+    const data = await res.json();
+    const groupData = {};
+    const groups = data.children || [];
+
+    for (const groupNode of groups) {
+      const letter = (groupNode.name || '').replace(/^Group\s+/i, '').trim().toUpperCase();
+      const entries = (groupNode.standings?.entries || []).slice().sort((a, b) => (a.note?.rank ?? 99) - (b.note?.rank ?? 99));
+      groupData[letter] = entries.map(entry => {
+        const stats = {};
+        (entry.stats || []).forEach(stat => { stats[stat.name] = stat.displayValue; });
+        return {
+          team: canonicalTeamName(entry.team?.displayName || entry.team?.name || ''),
+          points: Number(stats.points || 0)
+        };
+      });
+    }
+
+    const changed = applyLiveStandingsToSetup(groupData);
+    setLiveStatus(changed ? 'Live bracket updated from current group results' : 'Live bracket synced with current group results');
+  } catch (e) {
+    setLiveStatus('Live results unavailable right now');
+  }
+}
+
+refreshBracketFromLiveResults();
+setInterval(refreshBracketFromLiveResults, 60000);
 
 // Bracket column layout:
 // [R32 L] [R16 L] [QF L] [SF L] | [Final] | [SF R] [QF R] [R16 R] [R32 R]
