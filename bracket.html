@@ -191,8 +191,6 @@ let setup = loadSetup();
 let picks = {};
 let userName = '';
 
-render();
-
 const ESPN_STANDINGS_URL = 'https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings';
 const TEAM_NAME_ALIASES = {
   'Bosnia-Herzegovina': 'Bosnia and Herzegovina',
@@ -307,6 +305,8 @@ const COLS = [
 
 const PREV = { r16:'r32', qf:'r16', sf:'qf', final:'sf' };
 
+render();
+
 function getTeam(round, matchIdx, pos) {
   if (round === 'r32') return (setup[matchIdx] || ['',''])[pos] || '';
   const prev = PREV[round];
@@ -413,7 +413,8 @@ function startOver() {
   document.getElementById('thankYou').style.display = 'none';
   document.getElementById('nameScreen').style.display = '';
   document.getElementById('nameInput').value = '';
-  document.getElementById('startBtn').disabled = true;
+  document.getElementById('bracketUI').style.display = '';
+  render();
 }
 
 // Commissioner
