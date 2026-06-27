@@ -17,6 +17,7 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 .btn-gold { background: #c9a227; color: #1a2733; }
 .btn-gold:hover:not(:disabled) { background: #dab83a; }
 .btn-gold:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-compact { display: block; width: auto; flex-shrink: 0; padding: 9px 16px; font-size: 13px; white-space: nowrap; }
 .btn-green { background: #1e7a40; color: #fff; }
 .btn-green:hover { background: #25924d; }
 .card { background: #ffffff; border: 1px solid #dde3ea; border-radius: 12px; padding: 18px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(20,30,45,0.05); }
@@ -66,8 +67,7 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 .match.third-match { width: 158px; border-color: #e0c89a; }
 
 /* Submit */
-#submitArea { max-width: 380px; margin: 16px auto; padding: 0 20px 40px; }
-#submitError { color: #c0392b; font-size: 13px; margin-top: 8px; text-align: center; }
+#submitError { color: #c0392b; font-size: 13px; padding: 8px 20px 0; text-align: center; }
 
 /* Thank you */
 #thankYou { display: none; text-align: center; padding: 48px 20px; max-width: 480px; margin: 0 auto; }
@@ -108,12 +108,10 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
     <div><div class="prog-num" id="progNum">0</div><div class="prog-label">of 32 picks</div></div>
     <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
     <div class="prog-remain" id="progRemain">32 left</div>
+    <button class="btn btn-gold btn-compact" id="submitBtn" onclick="submitBracket()" disabled>Submit My Bracket →</button>
   </div>
+  <div id="submitError"></div>
   <div id="bracketScroll"><div class="bracket" id="bracket"></div></div>
-  <div id="submitArea">
-    <button class="btn btn-gold" id="submitBtn" onclick="submitBracket()" disabled>Submit My Bracket →</button>
-    <div id="submitError"></div>
-  </div>
 </div>
 
 <!-- Thank you -->
