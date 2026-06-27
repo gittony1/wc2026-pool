@@ -173,7 +173,7 @@ const DEFAULT = [
 
 const BRACKET_STORAGE_KEY = 'wc2026_bsetup';
 const BRACKET_LAYOUT_VERSION_KEY = 'wc2026_bsetup_version';
-const BRACKET_LAYOUT_VERSION = 2;
+const BRACKET_LAYOUT_VERSION = 3;
 
 function loadSetup() {
   const storedSetup = JSON.parse(localStorage.getItem(BRACKET_STORAGE_KEY) || 'null');
@@ -212,15 +212,16 @@ function setLiveStatus(message) {
   if (el) el.textContent = message;
 }
 
-function shouldApplyLiveUpdates() {
-  return setup.some(match => match.some(team => typeof team === 'string' && /^(Winner|Runner-up|3rd)/.test(team)))
-    || JSON.stringify(setup) === JSON.stringify(DEFAULT);
+function hasCompletedGroup(groupData, groupLetter) {
+  const group = groupData[groupLetter.toUpperCase()];
+  if (!group || group.length < 4) return false;
+  return group.every(entry => Number(entry.gamesPlayed || 0) >= 3);
 }
 
 function getGroupStandings(groupData, groupLetter, rankIndex) {
   const group = groupData[groupLetter.toUpperCase()];
-  if (!group || !group[rankIndex]) return '';
-  return group[rankIndex].team || '';
+  if (!group || !group[rankIndex]) return null;
+  return group[rankIndex];
 }
 
 function resolveLiveTeamName(teamName, groupData) {
@@ -228,29 +229,23 @@ function resolveLiveTeamName(teamName, groupData) {
   const normalized = teamName.trim();
 
   const winnerMatch = normalized.match(/^Winner Group ([A-L])$/i);
-  if (winnerMatch) return getGroupStandings(groupData, winnerMatch[1], 0) || normalized;
+  if (winnerMatch) {
+    return hasCompletedGroup(groupData, winnerMatch[1])
+      ? (getGroupStandings(groupData, winnerMatch[1], 0)?.team || normalized)
+      : normalized;
+  }
 
   const runnerUpMatch = normalized.match(/^Runner-up Group ([A-L])$/i);
-  if (runnerUpMatch) return getGroupStandings(groupData, runnerUpMatch[1], 1) || normalized;
-
-  const thirdMatch = normalized.match(/^3rd Group ([A-L](?:\/[A-L])*)$/i);
-  if (thirdMatch) {
-    const groupLetters = thirdMatch[1].split('/').map(g => g.trim().toUpperCase());
-    const candidates = groupLetters
-      .map(letter => {
-        const team = getGroupStandings(groupData, letter, 2);
-        return team ? { team, points: groupData[letter]?.[2]?.points || 0 } : null;
-      })
-      .filter(Boolean)
-      .sort((a, b) => (b.points || 0) - (a.points || 0));
-    return candidates[0]?.team || normalized;
+  if (runnerUpMatch) {
+    return hasCompletedGroup(groupData, runnerUpMatch[1])
+      ? (getGroupStandings(groupData, runnerUpMatch[1], 1)?.team || normalized)
+      : normalized;
   }
 
   return normalized;
 }
 
 function applyLiveStandingsToSetup(groupData) {
-  if (!shouldApplyLiveUpdates()) return false;
   const updatedSetup = setup.map(match => match.map(team => resolveLiveTeamName(team, groupData)));
   if (JSON.stringify(updatedSetup) !== JSON.stringify(setup)) {
     setup = updatedSetup;
@@ -277,7 +272,8 @@ async function refreshBracketFromLiveResults() {
         (entry.stats || []).forEach(stat => { stats[stat.name] = stat.displayValue; });
         return {
           team: canonicalTeamName(entry.team?.displayName || entry.team?.name || ''),
-          points: Number(stats.points || 0)
+          points: Number(stats.points || 0),
+          gamesPlayed: Number(stats.gamesPlayed || 0)
         };
       });
     }
