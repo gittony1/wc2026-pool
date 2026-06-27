@@ -22,6 +22,7 @@ header h1 { font-size: 20px; font-weight: 800; }
 header h1 .wc { color: #c9a227; }
 header p { font-size: 13px; color: #8fa8c0; margin-top: 4px; }
 .container { max-width: 860px; margin: 0 auto; padding: 20px 16px 40px; }
+.container-wide { max-width: 1700px; }
 .card { background: #0b1d2e; border: 1px solid #1a3350; border-radius: 12px; padding: 18px; margin-bottom: 16px; }
 .card-title { font-size: 13px; font-weight: 800; color: #c9a227; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.6px; }
 input[type="text"] {
@@ -196,18 +197,21 @@ table.std-table td:first-child { text-align: left; display: flex; align-items: c
   </header>
 
   <div class="container">
-
     <div class="card">
       <div class="card-title">👤 Your Name</div>
       <input type="text" id="nameInput" placeholder="First and last name" oninput="updateSubmit()" maxlength="60" />
     </div>
+  </div>
 
+  <div class="container container-wide">
     <div class="card">
       <div class="card-title"> Official Knockout Bracket</div>
       <p class="muted" style="margin-bottom:12px;font-size:13px;">Use the embedded bracket below to make your knockout-stage picks through the champion.</p>
       <iframe src="bracket.html" style="width:100%;min-height:1050px;border:1px solid #1a3350;border-radius:12px;background:#07111f;" title="World Cup 2026 Knockout Bracket"></iframe>
     </div>
+  </div>
 
+  <div class="container">
     <div id="deadlinePassed" style="display:none;background:#2a0f0f;border:1px solid #5a1010;color:#f07070;padding:12px 14px;border-radius:8px;font-size:13px;text-align:center;margin-bottom:10px;">
       ⏱️ The group stage picks deadline (Thursday June 11 EOD) has passed. Submissions are closed.
     </div>
@@ -215,7 +219,6 @@ table.std-table td:first-child { text-align: left; display: flex; align-items: c
       Submit My Picks →
     </button>
     <div id="submitError"></div>
-
   </div>
 </div>
 
