@@ -189,9 +189,16 @@ function doGet(e) {
 
     let bracketPicks = {};
     try { bracketPicks = r[15] ? JSON.parse(r[15]) : {}; } catch (err) { bracketPicks = {}; }
-    const bracketPoints = computeBracketPoints_(bracketPicks, results);
+    const breakdown = computeBracketBreakdown_(bracketPicks, results);
+    const bracketPoints = Object.values(breakdown).reduce((s, v) => s + v, 0);
 
     p.groupPoints = groupPoints;
+    p.r32Points = breakdown.r32;
+    p.r16Points = breakdown.r16;
+    p.qfPoints = breakdown.qf;
+    p.sfPoints = breakdown.sf;
+    p.thirdPoints = breakdown.third;
+    p.finalPoints = breakdown.final;
     p.bracketPoints = bracketPoints;
     p.totalPoints = groupPoints + bracketPoints;
     return p;
@@ -201,17 +208,17 @@ function doGet(e) {
   return jsonOutput_(participants);
 }
 
-function computeBracketPoints_(picks, results) {
-  let pts = 0;
+function computeBracketBreakdown_(picks, results) {
+  const breakdown = { r32: 0, r16: 0, qf: 0, sf: 0, third: 0, final: 0 };
   Object.keys(ROUND_COUNTS).forEach(round => {
     for (let idx = 0; idx < ROUND_COUNTS[round]; idx++) {
       const key = `${round}_${idx}`;
       const actual = results[key];
       const pick = picks[key];
-      if (actual && pick && canonical_(pick) === actual) pts += ROUND_POINTS[round];
+      if (actual && pick && canonical_(pick) === actual) breakdown[round] += ROUND_POINTS[round];
     }
   });
-  return pts;
+  return breakdown;
 }
 
 // ---------- Bracket tree (mirrors bracket.html's getTeam/getLoser) ----------
