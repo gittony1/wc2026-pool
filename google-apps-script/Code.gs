@@ -1,8 +1,8 @@
 /**
  * World Cup 2026 Pool — backend.
  *
- * One sheet (whichever is "active" when this runs — matches the original
- * script's behavior) holds one row per participant:
+ * The sheet literally named "Sheet1" (see MAIN_SHEET_NAME/getMainSheet_)
+ * holds one row per participant:
  *   Timestamp | Name | Group A..L | Total | BracketPicks (JSON) | BracketSubmittedAt
  *
  * More sheets are created automatically as needed:
@@ -84,6 +84,18 @@ function onOpen() {
 
 // ---------- Sheet helpers ----------
 
+// The main participant data lives in this sheet specifically — never rely on
+// getActiveSheet() for it, since that resolves to whichever tab a person last
+// clicked into, not necessarily this one (this previously caused
+// refreshReadableBracketPicks to wipe its own output when run while sitting
+// on the BracketPicksReadable tab instead of this one).
+const MAIN_SHEET_NAME = 'Sheet1';
+
+function getMainSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  return ss.getSheetByName(MAIN_SHEET_NAME) || ss.getSheets()[0];
+}
+
 function getOrCreateSheet_(name, headers) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = ss.getSheetByName(name);
@@ -127,7 +139,7 @@ function jsonOutput_(obj) {
 
 function doPost(e) {
   const data = JSON.parse(e.postData.contents);
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const sheet = getMainSheet_();
   ensureSchema_(sheet);
 
   const name = String(data.name || '').trim();
@@ -178,7 +190,7 @@ function doGet(e) {
     return jsonOutput_(setup.map((pair, idx) => ({ idx, teamA: pair[0], teamB: pair[1] })));
   }
 
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const sheet = getMainSheet_();
   ensureSchema_(sheet);
   const lastRow = sheet.getLastRow();
   if (lastRow <= 1) return jsonOutput_([]);
@@ -241,11 +253,20 @@ const READABLE_ROUNDS = ['r32', 'r16', 'qf', 'sf', 'third', 'final'];
 const READABLE_HEADERS = ['Name', 'R32 Picks', 'R16 Picks', 'QF Picks', 'SF Picks', '3rd Place Pick', 'Champion Pick'];
 
 function refreshReadableBracketPicks() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const sheet = getMainSheet_();
   ensureSchema_(sheet);
   const outSheet = getOrCreateSheet_('BracketPicksReadable', READABLE_HEADERS);
 
+  // Re-assert the header row and wipe any stray leftover columns past it
+  // (this sheet previously got corrupted by a getActiveSheet() mixup that
+  // wrote the main sheet's headers/data onto it — this makes the fix
+  // self-healing instead of requiring a manual cleanup).
+  outSheet.getRange(1, 1, 1, READABLE_HEADERS.length).setValues([READABLE_HEADERS]).setFontWeight('bold');
   const outLastRow = outSheet.getLastRow();
+  const outLastCol = outSheet.getLastColumn();
+  if (outLastCol > READABLE_HEADERS.length) {
+    outSheet.getRange(1, READABLE_HEADERS.length + 1, Math.max(outLastRow, 1), outLastCol - READABLE_HEADERS.length).clearContent();
+  }
   if (outLastRow > 1) {
     outSheet.getRange(2, 1, outLastRow - 1, READABLE_HEADERS.length).clearContent();
   }
