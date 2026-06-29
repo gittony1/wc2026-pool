@@ -110,6 +110,7 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
     <div class="prog-remain" id="progRemain">32 left</div>
     <button class="btn btn-gold btn-compact" id="submitBtn" onclick="submitBracket()" disabled>Submit My Bracket →</button>
   </div>
+  <div id="deadlineNotice" style="display:none;text-align:center;font-size:12px;color:#a3372e;background:#fbeceb;border-bottom:1px solid #f0c9c6;padding:8px 20px;">Picks are closed — the Round of 32 has started.</div>
   <div id="submitError"></div>
   <div id="bracketScroll"><div class="bracket" id="bracket"></div></div>
 </div>
@@ -179,6 +180,10 @@ const BRACKET_LAYOUT_VERSION_KEY = 'wc2026_bsetup_version';
 const BRACKET_LAYOUT_VERSION = 4;
 const BRACKET_CUSTOM_OVERRIDE_KEY = 'wc2026_bsetup_override';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYGdtHkwbD7lZRtk6Ct1gW2qqVlpVPy99BB0Ix9qq8nYvXaV4C0yB2rzliwNrTCod7/exec';
+
+// Picks lock once the Round of 32 kicks off — matches the schedule on the main page.
+const PICKS_DEADLINE = new Date('2026-06-28T00:00:00');
+function deadlinePassed() { return Date.now() > PICKS_DEADLINE.getTime(); }
 
 function loadSetup() {
   const storedSetup = JSON.parse(localStorage.getItem(BRACKET_STORAGE_KEY) || 'null');
@@ -397,7 +402,16 @@ function render() {
   const rem = document.getElementById('progRemain');
   rem.textContent = n >= 32 ? '✓ Done!' : (32 - n) + ' left';
   rem.className = 'prog-remain' + (n >= 32 ? ' done' : '');
-  document.getElementById('submitBtn').disabled = n < 32 || !userName.trim();
+  const submitBtn = document.getElementById('submitBtn');
+  const closed = deadlinePassed();
+  document.getElementById('deadlineNotice').style.display = closed ? '' : 'none';
+  if (closed) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Picks Closed';
+  } else {
+    submitBtn.disabled = n < 32 || !userName.trim();
+    submitBtn.textContent = 'Submit My Bracket →';
+  }
 }
 
 function drawConnectors() {
@@ -459,7 +473,7 @@ function startBracket() {
 }
 
 async function submitBracket() {
-  if (Object.keys(picks).length < 32 || !userName.trim()) return;
+  if (deadlinePassed() || Object.keys(picks).length < 32 || !userName.trim()) return;
 
   const btn = document.getElementById('submitBtn');
   const err = document.getElementById('submitError');
