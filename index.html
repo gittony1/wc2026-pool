@@ -203,7 +203,6 @@ async function loadStandings() {
 }
 
 const GROUP_LETTERS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
-const MEDALS = ['🥇','🥈','🥉'];
 
 function togglePickRow(id) {
   const detail = document.getElementById(id);
@@ -261,11 +260,13 @@ async function loadLeaderboard() {
         <th>Group</th><th>R32</th><th>R16</th><th>QF</th><th>SF</th><th>3rd</th><th>Final</th>
         <th>Bracket</th><th>Total</th>
       </tr></thead><tbody>`;
+    let displayRank = 1;
     participants.forEach((p, i) => {
+      if (i > 0 && p.totalPoints < participants[i - 1].totalPoints) displayRank = i + 1;
       const detailId = `ldr-detail-${i}`;
-      const rank = MEDALS[i] || `<span style="font-size:11px;font-weight:700;color:#8a96a3;min-width:18px;display:inline-block;text-align:center;">${i+1}</span>`;
+      const rankLabel = `<span style="font-size:11px;font-weight:700;color:#8a96a3;min-width:18px;display:inline-block;text-align:center;">${displayRank}</span>`;
       html += `<tr class="ldr-data-row" onclick="togglePickRow('${detailId}')">
-        <td style="text-align:left;white-space:nowrap;">${rank} <span class="chevron">▶</span> <strong>${p.name}</strong></td>
+        <td style="text-align:left;white-space:nowrap;">${rankLabel} <span class="chevron">▶</span> <strong>${p.name}</strong></td>
         <td>${p.groupPoints ?? 0}</td>
         <td>${p.r32Points ?? 0}</td>
         <td>${p.r16Points ?? 0}</td>
