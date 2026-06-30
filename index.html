@@ -255,17 +255,17 @@ async function loadLeaderboard() {
       return;
     }
     let html = `<div style="color:#64748b;font-size:12px;margin-bottom:12px;">${participants.length} player${participants.length!==1?'s':''} in the pool · click a name to see their picks</div>`;
-    html += `<div style="overflow-x:auto;"><table class="std-table" style="min-width:920px;">
+    html += `<div style="overflow-x:auto;"><table class="std-table" style="min-width:860px;">
       <thead><tr>
-        <th style="text-align:left;">Rank</th><th style="text-align:left;">Name</th>
+        <th style="text-align:left;">Name</th>
         <th>Group</th><th>R32</th><th>R16</th><th>QF</th><th>SF</th><th>3rd</th><th>Final</th>
         <th>Bracket</th><th>Total</th>
       </tr></thead><tbody>`;
     participants.forEach((p, i) => {
       const detailId = `ldr-detail-${i}`;
+      const rank = MEDALS[i] || `<span style="font-size:11px;font-weight:700;color:#8a96a3;min-width:18px;display:inline-block;text-align:center;">${i+1}</span>`;
       html += `<tr class="ldr-data-row" onclick="togglePickRow('${detailId}')">
-        <td style="text-align:left;">${MEDALS[i] || (i+1)}</td>
-        <td style="text-align:left;white-space:nowrap;display:flex;align-items:center;"><span class="chevron">▶</span><strong>${p.name}</strong></td>
+        <td style="text-align:left;white-space:nowrap;">${rank} <span class="chevron">▶</span> <strong>${p.name}</strong></td>
         <td>${p.groupPoints ?? 0}</td>
         <td>${p.r32Points ?? 0}</td>
         <td>${p.r16Points ?? 0}</td>
@@ -277,7 +277,7 @@ async function loadLeaderboard() {
         <td class="std-pts">${p.totalPoints ?? 0}</td>
       </tr>
       <tr class="ldr-detail-row" id="${detailId}">
-        <td colspan="11">${renderPickDetail(p, detailId)}</td>
+        <td colspan="10">${renderPickDetail(p, detailId)}</td>
       </tr>`;
     });
     html += `</tbody></table></div>`;
