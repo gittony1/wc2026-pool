@@ -233,6 +233,8 @@ function hasCustomSetupOverride() {
 }
 
 async function refreshBracketFromOfficialSource() {
+  // In results mode, loadLiveResults() owns setup + status + rendering.
+  if (deadlinePassed()) return;
   if (hasCustomSetupOverride()) {
     setLiveStatus('Using your saved bracket setup');
     return;
