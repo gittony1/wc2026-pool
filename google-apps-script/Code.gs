@@ -40,18 +40,18 @@ const R32_SEED = [
   ['France','Sweden'],
   ['South Africa','Canada'],
   ['Netherlands','Morocco'],
-  ['2K','2L'],
-  ['Spain','2J'],
+  ['Portugal','Croatia'],
+  ['Spain','Austria'],
   ['United States','Bosnia and Herzegovina'],
-  ['Belgium','3RD A/E/H/I/J'],
+  ['Belgium','Senegal'],
   ['Brazil','Japan'],
   ['Ivory Coast','Norway'],
-  ['Mexico','3RD C/E/F/H/I'],
-  ['1L','3RD E/H/I/J/K'],
+  ['Mexico','Ecuador'],
+  ['England','DR Congo'],
   ['Argentina','Cape Verde'],
   ['Australia','Egypt'],
-  ['Switzerland','3RD E/F/G/I/J'],
-  ['1K','3RD D/E/I/J/L']
+  ['Switzerland','Algeria'],
+  ['Colombia','Ghana']
 ];
 
 const TEAM_NAME_ALIASES = {

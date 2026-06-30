@@ -160,28 +160,29 @@ const FLAGS = {
 function f(name) { return (FLAGS[name] || '') + (FLAGS[name] ? ' ' : ''); }
 
 // Default official Round of 32 matchups ordered to match the ESPN bracket layout.
+// All 16 matchups now confirmed from ESPN + group standings (updated 2026-06-29).
 const DEFAULT = [
   ['Germany','Paraguay'],
   ['France','Sweden'],
   ['South Africa','Canada'],
   ['Netherlands','Morocco'],
-  ['2K','2L'],
-  ['Spain','2J'],
+  ['Portugal','Croatia'],
+  ['Spain','Austria'],
   ['United States','Bosnia and Herzegovina'],
-  ['Belgium','3RD A/E/H/I/J'],
+  ['Belgium','Senegal'],
   ['Brazil','Japan'],
   ['Ivory Coast','Norway'],
-  ['Mexico','3RD C/E/F/H/I'],
-  ['1L','3RD E/H/I/J/K'],
+  ['Mexico','Ecuador'],
+  ['England','DR Congo'],
   ['Argentina','Cape Verde'],
   ['Australia','Egypt'],
-  ['Switzerland','3RD E/F/G/I/J'],
-  ['1K','3RD D/E/I/J/L']
+  ['Switzerland','Algeria'],
+  ['Colombia','Ghana']
 ];
 
 const BRACKET_STORAGE_KEY = 'wc2026_bsetup';
 const BRACKET_LAYOUT_VERSION_KEY = 'wc2026_bsetup_version';
-const BRACKET_LAYOUT_VERSION = 4;
+const BRACKET_LAYOUT_VERSION = 5; // bumped — forces localStorage refresh with resolved matchups
 const BRACKET_CUSTOM_OVERRIDE_KEY = 'wc2026_bsetup_override';
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYGdtHkwbD7lZRtk6Ct1gW2qqVlpVPy99BB0Ix9qq8nYvXaV4C0yB2rzliwNrTCod7/exec';
 
@@ -190,9 +191,10 @@ const PICKS_DEADLINE = new Date('2026-06-28T00:00:00');
 function deadlinePassed() { return Date.now() > PICKS_DEADLINE.getTime(); }
 
 function loadSetup() {
+  const storedVersion = Number(localStorage.getItem(BRACKET_LAYOUT_VERSION_KEY));
   const storedSetup = JSON.parse(localStorage.getItem(BRACKET_STORAGE_KEY) || 'null');
 
-  if (Array.isArray(storedSetup) && storedSetup.length === DEFAULT.length) {
+  if (storedVersion === BRACKET_LAYOUT_VERSION && Array.isArray(storedSetup) && storedSetup.length === DEFAULT.length) {
     return storedSetup;
   }
 
