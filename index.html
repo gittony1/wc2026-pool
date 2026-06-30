@@ -94,8 +94,8 @@ tr.ldr-detail-row.show { display: table-row; }
 <body>
 
 <nav style="background:#ffffff;border-bottom:1px solid #dde3ea;display:flex;">
-  <button class="tab-btn" onclick="showTab('picks',this)">📺 Live Results</button>
   <button class="tab-btn active" onclick="showTab('leaderboard',this)">🏆 Leaderboard</button>
+  <button class="tab-btn" onclick="showTab('picks',this)">📺 Live Results</button>
   <button class="tab-btn" onclick="showTab('schedule',this)">📅 Schedule & Rules</button>
   <button class="tab-btn" onclick="showTab('standings',this)">⚽ Group Standings</button>
 </nav>
@@ -148,6 +148,22 @@ tr.ldr-detail-row.show { display: table-row; }
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYGdtHkwbD7lZRtk6Ct1gW2qqVlpVPy99BB0Ix9qq8nYvXaV4C0yB2rzliwNrTCod7/exec';
+
+const FLAGS = {
+  'Germany':'🇩🇪','France':'🇫🇷','Brazil':'🇧🇷','Argentina':'🇦🇷','Spain':'🇪🇸',
+  'Netherlands':'🇳🇱','Portugal':'🇵🇹','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Belgium':'🇧🇪','Uruguay':'🇺🇾',
+  'United States':'🇺🇸','Mexico':'🇲🇽','Canada':'🇨🇦','Colombia':'🇨🇴','Ecuador':'🇪🇨',
+  'Chile':'🇨🇱','Paraguay':'🇵🇾','Peru':'🇵🇪','Venezuela':'🇻🇪','Bolivia':'🇧🇴',
+  'Japan':'🇯🇵','South Korea':'🇰🇷','Australia':'🇦🇺','Iran':'🇮🇷','Saudi Arabia':'🇸🇦',
+  'Morocco':'🇲🇦','Nigeria':'🇳🇬','Senegal':'🇸🇳','Egypt':'🇪🇬','South Africa':'🇿🇦',
+  'Cameroon':'🇨🇲','Ghana':'🇬🇭','Ivory Coast':'🇨🇮','DR Congo':'🇨🇩','Tunisia':'🇹🇳',
+  'Sweden':'🇸🇪','Denmark':'🇩🇰','Switzerland':'🇨🇭','Austria':'🇦🇹','Croatia':'🇭🇷',
+  'Serbia':'🇷🇸','Czech Republic':'🇨🇿','Turkey':'🇹🇷','Ukraine':'🇺🇦','Hungary':'🇭🇺',
+  'Slovakia':'🇸🇰','Romania':'🇷🇴','Norway':'🇳🇴','Poland':'🇵🇱','Bosnia and Herzegovina':'🇧🇦',
+  'Cape Verde':'🇨🇻','Algeria':'🇩🇿','China':'🇨🇳','India':'🇮🇳','Indonesia':'🇮🇩',
+  'New Zealand':'🇳🇿','Panama':'🇵🇦','Costa Rica':'🇨🇷','Honduras':'🇭🇳','Jamaica':'🇯🇲',
+  'Uzbekistan':'🇺🇿','Jordan':'🇯🇴','Iraq':'🇮🇶','Qatar':'🇶🇦','Thailand':'🇹🇭',
+};
 
 window.addEventListener('message', e => {
   if (e.data && e.data.type === 'wc2026-bracket-height') {
@@ -254,19 +270,22 @@ async function loadLeaderboard() {
       return;
     }
     let html = `<div style="color:#64748b;font-size:12px;margin-bottom:12px;">${participants.length} player${participants.length!==1?'s':''} in the pool · click a name to see their picks</div>`;
-    html += `<div style="overflow-x:auto;"><table class="std-table" style="min-width:860px;">
+    html += `<div style="overflow-x:auto;"><table class="std-table" style="min-width:780px;">
       <thead><tr>
         <th style="text-align:left;">Name</th>
         <th>Group Stage Total</th><th>R32</th><th>R16</th><th>QF</th><th>SF</th><th>3rd</th><th>Final</th>
-        <th>Knockout Bracket Total</th><th>Total</th>
+        <th>Total</th>
       </tr></thead><tbody>`;
     let displayRank = 1;
     participants.forEach((p, i) => {
       if (i > 0 && p.totalPoints < participants[i - 1].totalPoints) displayRank = i + 1;
       const detailId = `ldr-detail-${i}`;
       const rankLabel = `<span style="font-size:11px;font-weight:700;color:#8a96a3;min-width:18px;display:inline-block;text-align:center;">${displayRank}</span>`;
+      const champTeam = p.picks?.final?.[0]?.team;
+      const champFlag = champTeam ? (FLAGS[champTeam] || '') : '';
+      const flagBadge = champFlag ? ` <span title="${champTeam}" style="font-size:14px;margin-left:4px;">${champFlag}</span>` : '';
       html += `<tr class="ldr-data-row" onclick="togglePickRow('${detailId}')">
-        <td style="text-align:left;white-space:nowrap;">${rankLabel} <span class="chevron">▶</span> <strong>${p.name}</strong></td>
+        <td style="text-align:left;white-space:nowrap;">${rankLabel} <span class="chevron">▶</span> <strong>${p.name}</strong>${flagBadge}</td>
         <td>${p.groupPoints ?? 0}</td>
         <td>${p.r32Points ?? 0}</td>
         <td>${p.r16Points ?? 0}</td>
@@ -274,11 +293,10 @@ async function loadLeaderboard() {
         <td>${p.sfPoints ?? 0}</td>
         <td>${p.thirdPoints ?? 0}</td>
         <td>${p.finalPoints ?? 0}</td>
-        <td>${p.bracketPoints ?? 0}</td>
         <td class="std-pts">${p.totalPoints ?? 0}</td>
       </tr>
       <tr class="ldr-detail-row" id="${detailId}">
-        <td colspan="10">${renderPickDetail(p, detailId)}</td>
+        <td colspan="9">${renderPickDetail(p, detailId)}</td>
       </tr>`;
     });
     html += `</tbody></table></div>`;
