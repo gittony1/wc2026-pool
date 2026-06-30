@@ -225,6 +225,24 @@ function doGet(e) {
     p.finalPoints = breakdown.final;
     p.bracketPoints = bracketPoints;
     p.totalPoints = groupPoints + bracketPoints;
+
+    // Per-round pick arrays for the leaderboard expand view.
+    // Each entry: { team, status } where status is 'correct'|'wrong'|'pending'.
+    const ROUNDS_LIST = ['r32','r16','qf','sf','third','final'];
+    p.picks = {};
+    ROUNDS_LIST.forEach(round => {
+      const list = [];
+      for (let idx = 0; idx < ROUND_COUNTS[round]; idx++) {
+        const key = `${round}_${idx}`;
+        const pick = bracketPicks[key];
+        if (!pick) continue;
+        const actual = results[key];
+        const status = !actual ? 'pending' : (canonical_(pick) === actual ? 'correct' : 'wrong');
+        list.push({ team: pick, status });
+      }
+      p.picks[round] = list;
+    });
+
     return p;
   });
 

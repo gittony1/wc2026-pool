@@ -64,6 +64,28 @@ table.std-table td:first-child { text-align: left; display: flex; align-items: c
 .std-team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
 .std-pts { font-weight: 800; color: #9a7b14; }
 
+/* Leaderboard expand rows */
+tr.ldr-data-row { cursor: pointer; }
+tr.ldr-data-row:hover td { background: #f7f9fc; }
+.chevron { display: inline-block; font-size: 9px; color: #8a96a3; margin-right: 5px; transition: transform 0.15s; }
+.chevron.open { transform: rotate(90deg); }
+tr.ldr-detail-row { display: none; }
+tr.ldr-detail-row.show { display: table-row; }
+.ldr-detail-row td { padding: 0 !important; border-top: none !important; }
+.detail-wrap { background: #f7f9fc; border-top: 1px solid #e7ebf0; border-bottom: 1px solid #dde3ea; padding: 14px 16px; }
+.detail-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed #dde3ea; font-size: 13px; }
+.detail-header strong { font-size: 14px; }
+.detail-header span { font-size: 12px; color: #64748b; }
+.detail-header span b { color: #9a7b14; }
+.detail-round { margin-bottom: 10px; }
+.detail-round:last-child { margin-bottom: 0; }
+.detail-round-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 5px; }
+.pick-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 3px 9px; border-radius: 20px; white-space: nowrap; border: 1px solid #dde3ea; background: #fff; color: #5b6b7d; }
+.chip.correct { background: #e7f6ec; border-color: #bfe6cc; color: #1c8a3c; font-weight: 700; }
+.chip.wrong { background: #fbeceb; border-color: #f0c9c6; color: #a3372e; text-decoration: line-through; opacity: 0.8; }
+.chip.pending { color: #8a96a3; font-style: italic; }
+
 @media (max-width: 520px) {
   header h1 { font-size: 17px; }
 }
@@ -183,6 +205,46 @@ async function loadStandings() {
 const GROUP_LETTERS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 const MEDALS = ['🥇','🥈','🥉'];
 
+function togglePickRow(id) {
+  const detail = document.getElementById(id);
+  const trigger = detail.previousElementSibling;
+  const ch = trigger.querySelector('.chevron');
+  const showing = detail.classList.toggle('show');
+  if (ch) ch.classList.toggle('open', showing);
+}
+
+const ROUND_LABELS = { r32:'Round of 32', r16:'Round of 16', qf:'Quarterfinals', sf:'Semifinals', third:'3rd Place', final:'Champion' };
+const ROUND_TOTALS = { r32:16, r16:8, qf:4, sf:2, third:1, final:1 };
+
+function renderPickDetail(p, id) {
+  const picks = p.picks || {};
+  const rounds = ['r32','r16','qf','sf','third','final'];
+  let html = `<div class="detail-wrap">
+    <div class="detail-header">
+      <strong>${p.name}'s picks</strong>
+      <span>Bracket: <b>${p.bracketPoints ?? 0} pts</b> &nbsp;·&nbsp; Group stage: <b>${p.groupPoints ?? 0} pts</b></span>
+    </div>`;
+  rounds.forEach(round => {
+    const list = picks[round] || [];
+    if (!list.length) return;
+    const correct = list.filter(x => x.status === 'correct').length;
+    const wrong = list.filter(x => x.status === 'wrong').length;
+    const pending = list.filter(x => x.status === 'pending').length;
+    const total = ROUND_TOTALS[round];
+    const decided = correct + wrong;
+    const labelSuffix = decided ? ` — ${correct}/${decided} correct` : '';
+    html += `<div class="detail-round">
+      <div class="detail-round-label">${ROUND_LABELS[round]} (${total} ${total === 1 ? 'pick' : 'picks'}${labelSuffix})</div>
+      <div class="pick-chips">`;
+    list.forEach(({team, status}) => {
+      html += `<span class="chip ${status}">${team}</span>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
 async function loadLeaderboard() {
   const el = document.getElementById('leaderboardBody');
   try {
@@ -192,7 +254,7 @@ async function loadLeaderboard() {
       el.innerHTML = '<div class="ldr-empty">No submissions yet. Be the first!</div>';
       return;
     }
-    let html = `<div style="color:#64748b;font-size:12px;margin-bottom:12px;">${participants.length} player${participants.length!==1?'s':''} in the pool</div>`;
+    let html = `<div style="color:#64748b;font-size:12px;margin-bottom:12px;">${participants.length} player${participants.length!==1?'s':''} in the pool · click a name to see their picks</div>`;
     html += `<div style="overflow-x:auto;"><table class="std-table" style="min-width:920px;">
       <thead><tr>
         <th style="text-align:left;">Rank</th><th style="text-align:left;">Name</th>
@@ -200,9 +262,10 @@ async function loadLeaderboard() {
         <th>Bracket</th><th>Total</th>
       </tr></thead><tbody>`;
     participants.forEach((p, i) => {
-      html += `<tr>
+      const detailId = `ldr-detail-${i}`;
+      html += `<tr class="ldr-data-row" onclick="togglePickRow('${detailId}')">
         <td style="text-align:left;">${MEDALS[i] || (i+1)}</td>
-        <td style="text-align:left;white-space:nowrap;"><strong>${p.name}</strong></td>
+        <td style="text-align:left;white-space:nowrap;display:flex;align-items:center;"><span class="chevron">▶</span><strong>${p.name}</strong></td>
         <td>${p.groupPoints ?? 0}</td>
         <td>${p.r32Points ?? 0}</td>
         <td>${p.r16Points ?? 0}</td>
@@ -212,6 +275,9 @@ async function loadLeaderboard() {
         <td>${p.finalPoints ?? 0}</td>
         <td>${p.bracketPoints ?? 0}</td>
         <td class="std-pts">${p.totalPoints ?? 0}</td>
+      </tr>
+      <tr class="ldr-detail-row" id="${detailId}">
+        <td colspan="11">${renderPickDetail(p, detailId)}</td>
       </tr>`;
     });
     html += `</tbody></table></div>`;
