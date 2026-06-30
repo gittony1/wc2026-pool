@@ -94,8 +94,8 @@ tr.ldr-detail-row.show { display: table-row; }
 <body>
 
 <nav style="background:#ffffff;border-bottom:1px solid #dde3ea;display:flex;">
-  <button class="tab-btn active" onclick="showTab('picks',this)">📋 Make Picks</button>
-  <button class="tab-btn" onclick="showTab('leaderboard',this)">🏆 Leaderboard</button>
+  <button class="tab-btn" onclick="showTab('picks',this)">📺 Live Results</button>
+  <button class="tab-btn active" onclick="showTab('leaderboard',this)">🏆 Leaderboard</button>
   <button class="tab-btn" onclick="showTab('schedule',this)">📅 Schedule & Rules</button>
   <button class="tab-btn" onclick="showTab('standings',this)">⚽ Group Standings</button>
 </nav>
@@ -127,7 +127,7 @@ tr.ldr-detail-row.show { display: table-row; }
   </div>
 </div>
 
-<div id="leaderboardSection" style="display:none;">
+<div id="leaderboardSection">
   <div class="container container-medium">
     <div class="card">
       <div class="card-title">🏆 Leaderboard</div>
@@ -136,7 +136,7 @@ tr.ldr-detail-row.show { display: table-row; }
   </div>
 </div>
 
-<div id="formWrap">
+<div id="formWrap" style="display:none;">
   <header>
     <h1>⚽ Reach <span class="wc">World Cup 2026</span> Pool</h1>
   </header>
@@ -257,8 +257,8 @@ async function loadLeaderboard() {
     html += `<div style="overflow-x:auto;"><table class="std-table" style="min-width:860px;">
       <thead><tr>
         <th style="text-align:left;">Name</th>
-        <th>Group</th><th>R32</th><th>R16</th><th>QF</th><th>SF</th><th>3rd</th><th>Final</th>
-        <th>Bracket</th><th>Total</th>
+        <th>Group Stage Total</th><th>R32</th><th>R16</th><th>QF</th><th>SF</th><th>3rd</th><th>Final</th>
+        <th>Knockout Bracket Total</th><th>Total</th>
       </tr></thead><tbody>`;
     let displayRank = 1;
     participants.forEach((p, i) => {
@@ -288,6 +288,8 @@ async function loadLeaderboard() {
   }
 }
 
+// Load leaderboard immediately since it's the default tab.
+loadLeaderboard();
 </script>
 </body>
 </html>
