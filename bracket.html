@@ -56,6 +56,10 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 .team-slot.picked { background: #1e7a40 !important; color: #fff !important; font-weight: 700; }
 .team-slot.tbd { color: #c3cad3; font-style: italic; cursor: default; }
 .team-slot.tbd:hover { background: none; }
+/* Read-only display in live results mode */
+.results-mode .team-slot { cursor: default; pointer-events: none; }
+.results-mode .team-slot:hover { background: none; color: #5b6b7d; }
+.results-mode .team-slot.picked:hover { background: #1e7a40; color: #fff; }
 .champ-slot { display: block; padding: 12px 10px; text-align: center; font-size: 12px; font-weight: 800; color: #9a7b14; }
 
 /* Divider */
@@ -105,7 +109,7 @@ input[type="text"]:focus, input[type="password"]:focus { border-color: #c9a227; 
 <!-- Bracket UI -->
 <div id="bracketUI">
   <div id="progressBar">
-    <div><div class="prog-num" id="progNum">0</div><div class="prog-label">of 32 picks</div></div>
+    <div><div class="prog-num" id="progNum">0</div><div class="prog-label" id="progLabel">of 32 picks</div></div>
     <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
     <div class="prog-remain" id="progRemain">32 left</div>
     <button class="btn btn-gold btn-compact" id="submitBtn" onclick="submitBracket()" disabled>Submit My Bracket →</button>
@@ -275,6 +279,68 @@ const COLS = [
 
 const PREV = { r16:'r32', qf:'r16', sf:'qf', final:'sf' };
 const ROUND_ORDER = ['r32', 'r16', 'qf', 'sf', 'final'];
+const ROUND_COUNTS = { r32:16, r16:8, qf:4, sf:2, third:1, final:1 };
+
+// Resolve which team occupies a bracket slot using actual results (not user picks).
+// Mirrors the server-side getTeamServer_ logic.
+function getTeamFromResults_(round, idx, pos, liveResults) {
+  if (round === 'r32') return (setup[idx] || ['',''])[pos] || '';
+  if (round === 'third') return getLoserFromResults_('sf', pos, liveResults);
+  const prev = PREV[round];
+  return liveResults[`${prev}_${idx*2+pos}`] || '';
+}
+function getLoserFromResults_(round, idx, liveResults) {
+  const t0 = getTeamFromResults_(round, idx, 0, liveResults);
+  const t1 = getTeamFromResults_(round, idx, 1, liveResults);
+  const winner = liveResults[`${round}_${idx}`];
+  if (!winner) return '';
+  return winner === t0 ? t1 : t0;
+}
+
+async function loadLiveResults() {
+  try {
+    setLiveStatus('Loading live results…');
+    const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260628-20260720');
+    const json = await res.json();
+    const events = (json.events || []).slice().sort((a,b) => new Date(a.date)-new Date(b.date));
+    const fixtures = [];
+    events.forEach(ev => {
+      const comp = ev.competitions?.[0];
+      if (!comp?.status?.type?.completed) return;
+      const comps = comp.competitors || [];
+      if (comps.length !== 2) return;
+      const winner = comps.find(c => c.winner);
+      if (!winner) return;
+      fixtures.push({
+        teams: comps.map(c => canonicalTeamName(c.team.displayName)),
+        winner: canonicalTeamName(winner.team.displayName)
+      });
+    });
+    const liveResults = {};
+    const rounds = ['r32','r16','qf','sf','third','final'];
+    let changed = true, guard = 0;
+    while (changed && guard < 6) {
+      changed = false; guard++;
+      rounds.forEach(round => {
+        for (let idx = 0; idx < ROUND_COUNTS[round]; idx++) {
+          const key = `${round}_${idx}`;
+          if (liveResults[key]) continue;
+          const t0 = getTeamFromResults_(round, idx, 0, liveResults);
+          const t1 = getTeamFromResults_(round, idx, 1, liveResults);
+          if (!t0 || !t1) continue;
+          const match = fixtures.find(f => f.teams.includes(t0) && f.teams.includes(t1));
+          if (match) { liveResults[key] = match.winner; changed = true; }
+        }
+      });
+    }
+    picks = liveResults;
+    const done = Object.keys(liveResults).length;
+    setLiveStatus(`Live results — ${done} of 32 matches completed`);
+    render();
+  } catch(e) {
+    setLiveStatus('Could not load live results — try refreshing');
+  }
+}
 
 render();
 
@@ -385,32 +451,43 @@ function render() {
     if (isFinal) html += `<div class="b-divider"></div>`;
   }
 
+  const closed = deadlinePassed();
+  bracket.classList.toggle('results-mode', closed);
   bracket.innerHTML = html;
   drawConnectors();
 
-  // Event delegation for picks
-  bracket.onclick = e => {
-    const btn = e.target.closest('.team-slot[data-team]');
-    if (!btn) return;
-    pick(btn.dataset.round, parseInt(btn.dataset.idx), btn.dataset.team);
-  };
-
-  // Progress
-  const n = Object.keys(picks).length;
-  document.getElementById('progNum').textContent = n;
-  document.getElementById('progFill').style.width = (n / 32 * 100) + '%';
-  const rem = document.getElementById('progRemain');
-  rem.textContent = n >= 32 ? '✓ Done!' : (32 - n) + ' left';
-  rem.className = 'prog-remain' + (n >= 32 ? ' done' : '');
-  const submitBtn = document.getElementById('submitBtn');
-  const closed = deadlinePassed();
-  document.getElementById('deadlineNotice').style.display = closed ? '' : 'none';
   if (closed) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Picks Closed';
+    bracket.onclick = null;
   } else {
-    submitBtn.disabled = n < 32 || !userName.trim();
-    submitBtn.textContent = 'Submit My Bracket →';
+    bracket.onclick = e => {
+      const btn = e.target.closest('.team-slot[data-team]');
+      if (!btn) return;
+      pick(btn.dataset.round, parseInt(btn.dataset.idx), btn.dataset.team);
+    };
+  }
+
+  const n = Object.keys(picks).length;
+  if (closed) {
+    // Results mode: repurpose progress bar to show match completion
+    document.getElementById('progNum').textContent = n;
+    document.getElementById('progLabel').textContent = 'of 32 matches complete';
+    document.getElementById('progFill').style.width = (n / 32 * 100) + '%';
+    const rem = document.getElementById('progRemain');
+    rem.textContent = n >= 32 ? '✓ All done!' : (32 - n) + ' to go';
+    rem.className = 'prog-remain' + (n >= 32 ? ' done' : '');
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('submitBtn').textContent = 'Picks Closed';
+    document.getElementById('deadlineNotice').style.display = 'none';
+  } else {
+    document.getElementById('progNum').textContent = n;
+    document.getElementById('progLabel').textContent = 'of 32 picks';
+    document.getElementById('progFill').style.width = (n / 32 * 100) + '%';
+    const rem = document.getElementById('progRemain');
+    rem.textContent = n >= 32 ? '✓ Done!' : (32 - n) + ' left';
+    rem.className = 'prog-remain' + (n >= 32 ? ' done' : '');
+    document.getElementById('submitBtn').disabled = n < 32 || !userName.trim();
+    document.getElementById('submitBtn').textContent = 'Submit My Bracket →';
+    document.getElementById('deadlineNotice').style.display = 'none';
   }
 }
 
@@ -507,11 +584,17 @@ function startOver() {
   userName = '';
   document.getElementById('thankYou').style.display = 'none';
   document.getElementById('liveStatus').style.display = '';
-  document.getElementById('bracketIntro').style.display = '';
-  document.getElementById('nameScreen').style.display = '';
-  document.getElementById('nameInput').value = '';
   document.getElementById('bracketUI').style.display = '';
-  render();
+  if (deadlinePassed()) {
+    document.getElementById('nameScreen').style.display = 'none';
+    document.getElementById('bracketIntro').style.display = 'none';
+    loadLiveResults();
+  } else {
+    document.getElementById('bracketIntro').style.display = '';
+    document.getElementById('nameScreen').style.display = '';
+    document.getElementById('nameInput').value = '';
+    render();
+  }
 }
 
 // Commissioner
@@ -562,6 +645,14 @@ if (saved) {
     document.getElementById('thankYou').style.display = 'block';
     document.getElementById('tyName').textContent = `Thanks, ${userName}!`;
   } catch(e) {}
+} else if (deadlinePassed()) {
+  // Picks are closed — skip the name screen and show the live results bracket directly.
+  document.getElementById('nameScreen').style.display = 'none';
+  document.getElementById('bracketIntro').style.display = 'none';
+  document.getElementById('bracketUI').style.display = '';
+  loadLiveResults();
+  // Refresh results every 90 seconds while the page is open.
+  setInterval(loadLiveResults, 90000);
 }
 
 // Tell the parent page (index.html) how tall we are so it can size the
