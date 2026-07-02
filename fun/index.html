@@ -47,8 +47,16 @@ header p { font-size: 12px; color: #cbbfef; margin-top: 4px; }
 .third-label { color: #b06a16; }
 .match.third-match { width: 158px; border-color: #e0c89a; }
 .champ-wrap .col-label { margin-bottom: 4px; }
-#clearBtn { display: block; margin: 12px auto 24px; padding: 8px 20px; background: #f1f4f8; border: 1px solid #dde3ea; border-radius: 8px; font-size: 12px; color: #64748b; cursor: pointer; }
-#clearBtn:hover { background: #e4e8ef; }
+#submitArea { max-width: 420px; margin: 16px auto 32px; padding: 0 20px; text-align: center; }
+#submitArea h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: #1a2733; }
+#submitArea input { display: block; width: 100%; padding: 9px 13px; font-size: 13px; border: 1px solid #dde3ea; border-radius: 8px; background: #f1f4f8; color: #1a2733; margin-bottom: 8px; outline: none; }
+#submitArea input:focus { border-color: #c9a227; }
+#submitBtn { width: 100%; padding: 11px; background: #c9a227; color: #1a2733; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
+#submitBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+#submitBtn:hover:not(:disabled) { background: #dab83a; }
+#submitMsg { font-size: 13px; margin-top: 10px; }
+#clearBtn { display: block; margin: 4px auto 0; padding: 8px 20px; background: none; border: none; font-size: 12px; color: #8a96a3; cursor: pointer; text-decoration: underline; }
+#clearBtn:hover { color: #64748b; }
 </style>
 </head>
 <body>
@@ -65,9 +73,19 @@ header p { font-size: 12px; color: #cbbfef; margin-top: 4px; }
 </div>
 
 <div id="bracketScroll"><div class="bracket" id="bracket"></div></div>
-<button id="clearBtn" onclick="clearPicks()">↺ Clear my picks</button>
+
+<div id="submitArea">
+  <h3>Submit your picks to the leaderboard</h3>
+  <input id="nameInput" type="text" placeholder="Your first and last name" maxlength="60"
+    oninput="updateSubmitBtn()" />
+  <button id="submitBtn" onclick="submitPicks()" disabled>Submit My Bracket →</button>
+  <div id="submitMsg"></div>
+  <button id="clearBtn" onclick="clearPicks()">↺ Clear my picks and start over</button>
+</div>
 
 <script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYGdtHkwbD7lZRtk6Ct1gW2qqVlpVPy99BB0Ix9qq8nYvXaV4C0yB2rzliwNrTCod7/exec';
+
 const FLAGS = {
   'Germany':'🇩🇪','France':'🇫🇷','Brazil':'🇧🇷','Argentina':'🇦🇷','Spain':'🇪🇸',
   'Netherlands':'🇳🇱','Portugal':'🇵🇹','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Belgium':'🇧🇪','Uruguay':'🇺🇾',
@@ -156,6 +174,7 @@ function pick(round, idx, team) {
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(userPicks));
   render();
+  updateSubmitBtn();
 }
 
 function clearDownstream(round, idx, team) {
@@ -172,6 +191,7 @@ function clearPicks() {
   userPicks = {};
   localStorage.removeItem(STORAGE_KEY);
   render();
+  updateSubmitBtn();
 }
 
 function render() {
@@ -374,8 +394,45 @@ function getTeamBase(round,idx,pos){
   return lockedResults[`${PREV[round]}_${idx*2+pos}`]||'';
 }
 
+function updateSubmitBtn() {
+  const name = document.getElementById('nameInput').value.trim();
+  const haspicks = Object.keys(userPicks).length > 0;
+  document.getElementById('submitBtn').disabled = !name || !haspicks;
+}
+
+async function submitPicks() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name || Object.keys(userPicks).length === 0) return;
+  const btn = document.getElementById('submitBtn');
+  const msg = document.getElementById('submitMsg');
+  btn.textContent = 'Submitting…';
+  btn.disabled = true;
+  msg.textContent = '';
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify({ name, type: 'bracket', picks: userPicks })
+    });
+    localStorage.setItem('wc2026_fun_name', name);
+    msg.style.color = '#1c8a3c';
+    msg.textContent = `✓ Submitted! You'll appear on the leaderboard shortly.`;
+    btn.textContent = 'Submitted ✓';
+  } catch(e) {
+    msg.style.color = '#c0392b';
+    msg.textContent = 'Submission failed — check your connection and try again.';
+    btn.textContent = 'Submit My Bracket →';
+    btn.disabled = false;
+  }
+}
+
+// Restore saved name if returning
+const savedName = localStorage.getItem('wc2026_fun_name');
+if (savedName) document.getElementById('nameInput').value = savedName;
+
 render();
 loadResults();
+updateSubmitBtn();
 
 window.parent?.postMessage({type:'wc2026-bracket-height',height:document.documentElement.scrollHeight},'*');
 new ResizeObserver(()=>window.parent?.postMessage({type:'wc2026-bracket-height',height:document.documentElement.scrollHeight},'*')).observe(document.body);
