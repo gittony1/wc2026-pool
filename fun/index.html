@@ -252,10 +252,10 @@ function render() {
       html += `</div>`; // match
     }
 
-    html += `</div></div>`; // b-col-inner, b-col
+    html += `</div>`; // close b-col-inner
 
     if (isFinal) {
-      // 3rd place
+      // 3rd place — inside b-col, after b-col-inner
       const tp0=getTeam('third',0,0), tp1=getTeam('third',0,1);
       const tpW=ap['third_0']||'';
       const tpLocked=isLocked('third',0);
@@ -280,9 +280,12 @@ function render() {
             >${f(team)}${team}</button>`;
         }
       }
-      html += `</div></div>`;
-      html += `<div class="b-divider"></div>`;
+      html += `</div></div>`; // close match, third-place
     }
+
+    html += `</div>`; // close b-col
+
+    if (isFinal) html += `<div class="b-divider"></div>`;
   }
 
   bracket.innerHTML = html;
