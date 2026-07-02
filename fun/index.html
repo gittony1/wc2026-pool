@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WC 2026 — Complete the Bracket</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { color-scheme: light; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #eef1f6; color: #1a2733; min-height: 100vh; }
+header { background: #002C84; padding: 14px 20px; text-align: center; border-bottom: 2px solid #c9a227; }
+header h1 { font-size: 18px; font-weight: 800; color: #fff; }
+header p { font-size: 12px; color: #cbbfef; margin-top: 4px; }
+#statusBar { text-align: center; padding: 8px 20px; font-size: 12px; color: #2f6690; border-bottom: 1px solid #dde3ea; background:#fff; }
+#legend { display: flex; gap: 16px; justify-content: center; padding: 8px 20px; font-size: 11px; background:#f7f9fc; border-bottom: 1px solid #dde3ea; flex-wrap:wrap; }
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.dot-result { background: #c9a227; }
+.dot-pick   { background: #1e7a40; }
+.dot-out    { background: #e0e6ef; border: 1px solid #c8d0db; }
+#bracketScroll { overflow-x: auto; padding: 16px; }
+.bracket { display: flex; gap: 34px; align-items: flex-start; min-width: max-content; position: relative; }
+#bracketLines { position: absolute; top: 0; left: 0; z-index: -1; pointer-events: none; }
+.b-col { display: flex; flex-direction: column; gap: 4px; }
+.b-col-inner { display: flex; flex-direction: column; justify-content: space-around; height: 600px; }
+.col-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; text-align: center; padding-bottom: 8px; white-space: nowrap; }
+.col-label.gold { color: #9a7b14; }
+.match { background: #fff; border: 1px solid #dde3ea; border-radius: 7px; overflow: hidden; width: 138px; box-shadow: 0 1px 2px rgba(20,30,45,0.05); }
+.match.final-match { border-color: #c9a227; width: 158px; }
+.team-slot { display: block; width: 100%; padding: 7px 8px; text-align: left; font-size: 11px; border: none; color: #5b6b7d; background: none; border-bottom: 1px solid #e7ebf0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 0.1s, color 0.1s; }
+.team-slot:last-child { border-bottom: none; }
+/* Official result (locked) — gold winner */
+.team-slot.result { background: #c9a227 !important; color: #1a2733 !important; font-weight: 700; cursor: default; }
+/* Eliminated by an official result — grayed out */
+.team-slot.eliminated { background: #f1f4f8 !important; color: #b0bac8 !important; text-decoration: line-through; cursor: default; }
+/* User's own pick — green */
+.team-slot.picked { background: #1e7a40 !important; color: #fff !important; font-weight: 700; cursor: pointer; }
+/* Pickable (game not yet played, teams known) */
+.team-slot.pickable { cursor: pointer; }
+.team-slot.pickable:hover { background: #eef4fa; color: #1a2733; }
+.team-slot.tbd { color: #c3cad3; font-style: italic; cursor: default; }
+.champ-slot { display: block; padding: 12px 10px; text-align: center; font-size: 12px; font-weight: 800; color: #9a7b14; }
+.champ-slot.result-champ { color: #9a7b14; }
+.champ-slot.pick-champ { color: #1e7a40; }
+.b-divider { width: 1px; background: #dde3ea; margin: 0 2px; align-self: stretch; margin-top: 29px; }
+.third-place { margin-top: -236px; }
+.third-label { color: #b06a16; }
+.match.third-match { width: 158px; border-color: #e0c89a; }
+.champ-wrap .col-label { margin-bottom: 4px; }
+#clearBtn { display: block; margin: 12px auto 24px; padding: 8px 20px; background: #f1f4f8; border: 1px solid #dde3ea; border-radius: 8px; font-size: 12px; color: #64748b; cursor: pointer; }
+#clearBtn:hover { background: #e4e8ef; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚽ WC 2026 — Complete the Bracket</h1>
+  <p>Official results are locked in gold · pick the remaining games in green</p>
+</header>
+<div id="statusBar">Loading results from ESPN…</div>
+<div id="legend">
+  <div class="legend-item"><div class="legend-dot dot-result"></div> Official result (locked)</div>
+  <div class="legend-item"><div class="legend-dot dot-pick"></div> Your pick</div>
+  <div class="legend-item"><div class="legend-dot dot-out"></div> Eliminated</div>
+</div>
+
+<div id="bracketScroll"><div class="bracket" id="bracket"></div></div>
+<button id="clearBtn" onclick="clearPicks()">↺ Clear my picks</button>
+
+<script>
+const FLAGS = {
+  'Germany':'🇩🇪','France':'🇫🇷','Brazil':'🇧🇷','Argentina':'🇦🇷','Spain':'🇪🇸',
+  'Netherlands':'🇳🇱','Portugal':'🇵🇹','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Belgium':'🇧🇪','Uruguay':'🇺🇾',
+  'United States':'🇺🇸','Mexico':'🇲🇽','Canada':'🇨🇦','Colombia':'🇨🇴','Ecuador':'🇪🇨',
+  'Paraguay':'🇵🇾','Japan':'🇯🇵','Australia':'🇦🇺','Morocco':'🇲🇦','Nigeria':'🇳🇬',
+  'Senegal':'🇸🇳','Egypt':'🇪🇬','South Africa':'🇿🇦','DR Congo':'🇨🇩','Ghana':'🇬🇭',
+  'Ivory Coast':'🇨🇮','Sweden':'🇸🇪','Denmark':'🇩🇰','Switzerland':'🇨🇭','Austria':'🇦🇹',
+  'Croatia':'🇭🇷','Serbia':'🇷🇸','Czech Republic':'🇨🇿','Turkey':'🇹🇷','Norway':'🇳🇴',
+  'Algeria':'🇩🇿','Cape Verde':'🇨🇻','Costa Rica':'🇨🇷','Bosnia and Herzegovina':'🇧🇦',
+};
+function f(name) { return (FLAGS[name] || '') + (FLAGS[name] ? ' ' : ''); }
+function esc(s) { return String(s).replace(/"/g,'&quot;'); }
+
+const ALIASES = {
+  'Bosnia-Herzegovina':'Bosnia and Herzegovina','Bosnia & Herzegovina':'Bosnia and Herzegovina',
+  'Congo DR':'DR Congo','Cabo Verde':'Cape Verde','Türkiye':'Turkey','USA':'United States',
+};
+function canon(n) { const t = String(n||'').trim(); return ALIASES[t]||t; }
+
+// All 16 R32 matchups (fully resolved as of 2026-06-29)
+const SETUP = [
+  ['Germany','Paraguay'],   ['France','Sweden'],
+  ['South Africa','Canada'],['Netherlands','Morocco'],
+  ['Portugal','Croatia'],   ['Spain','Austria'],
+  ['United States','Bosnia and Herzegovina'],['Belgium','Senegal'],
+  ['Brazil','Japan'],       ['Ivory Coast','Norway'],
+  ['Mexico','Ecuador'],     ['England','DR Congo'],
+  ['Argentina','Cape Verde'],['Australia','Egypt'],
+  ['Switzerland','Algeria'],['Colombia','Ghana'],
+];
+
+const PREV = { r16:'r32', qf:'r16', sf:'qf', final:'sf' };
+const ROUND_COUNTS = { r32:16, r16:8, qf:4, sf:2, third:1, final:1 };
+const ROUND_ORDER  = ['r32','r16','qf','sf','final'];
+const COLS = [
+  { round:'r32', indices:[0,1,2,3,4,5,6,7],      label:'Round of 32' },
+  { round:'r16', indices:[0,1,2,3],               label:'Round of 16' },
+  { round:'qf',  indices:[0,1],                   label:'Quarters'    },
+  { round:'sf',  indices:[0],                     label:'Semis'       },
+  { round:'final',indices:[0],                    label:'Final', isFinal:true },
+  { round:'sf',  indices:[1],                     label:'Semis'       },
+  { round:'qf',  indices:[2,3],                   label:'Quarters'    },
+  { round:'r16', indices:[4,5,6,7],               label:'Round of 16' },
+  { round:'r32', indices:[8,9,10,11,12,13,14,15], label:'Round of 32' },
+];
+
+const STORAGE_KEY = 'wc2026_fun_picks';
+
+// Official results fetched from ESPN (locked, immutable)
+let lockedResults = {};
+// User's own picks for remaining games
+let userPicks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+// Combined: locked takes priority
+function allPicks() { return { ...userPicks, ...lockedResults }; }
+
+function getTeam(round, idx, pos) {
+  if (round === 'r32') return (SETUP[idx]||['',''])[pos]||'';
+  if (round === 'third') {
+    const p = allPicks();
+    const t0 = getTeam('sf',0,0), t1 = getTeam('sf',0,1), w = p['sf_0'];
+    if (!w) return '';
+    const loser0 = w===t0?t1:t0;
+    const t2 = getTeam('sf',1,0), t3 = getTeam('sf',1,1), w2 = p['sf_1'];
+    if (!w2) return '';
+    const loser1 = w2===t2?t3:t2;
+    return pos===0 ? loser0 : loser1;
+  }
+  return allPicks()[`${PREV[round]}_${idx*2+pos}`]||'';
+}
+
+function isLocked(round, idx) {
+  return !!lockedResults[`${round}_${idx}`];
+}
+
+function pick(round, idx, team) {
+  const key = `${round}_${idx}`;
+  if (lockedResults[key]) return; // can't override official results
+  if (userPicks[key] === team) {
+    delete userPicks[key];
+    clearDownstream(round, idx, team);
+  } else {
+    const old = userPicks[key];
+    if (old) clearDownstream(round, idx, old);
+    userPicks[key] = team;
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(userPicks));
+  render();
+}
+
+function clearDownstream(round, idx, team) {
+  const next = {r32:'r16',r16:'qf',qf:'sf',sf:'final'}[round];
+  if (!next) return;
+  const nextIdx = Math.floor(idx/2);
+  const key = `${next}_${nextIdx}`;
+  if (userPicks[key]===team) { delete userPicks[key]; clearDownstream(next,nextIdx,team); }
+  // also clear third_0 if an sf pick changed
+  if (round==='sf') { delete userPicks['third_0']; }
+}
+
+function clearPicks() {
+  userPicks = {};
+  localStorage.removeItem(STORAGE_KEY);
+  render();
+}
+
+function render() {
+  const ap = allPicks();
+  const bracket = document.getElementById('bracket');
+
+  // Stale third-place check
+  if (userPicks['third_0']) {
+    const t0=getTeam('third',0,0), t1=getTeam('third',0,1);
+    if (![t0,t1].includes(userPicks['third_0'])) delete userPicks['third_0'];
+  }
+
+  let html = '<svg id="bracketLines"><g></g></svg>';
+
+  for (const col of COLS) {
+    const { round, indices, label, isFinal } = col;
+    html += `<div class="b-col"><div class="col-label${isFinal?' gold':''}">${label}</div><div class="b-col-inner">`;
+
+    for (const idx of indices) {
+      const t0 = getTeam(round,idx,0);
+      const t1 = getTeam(round,idx,1);
+      const winner = ap[`${round}_${idx}`]||'';
+      const locked = isLocked(round,idx);
+
+      html += `<div class="match${isFinal?' final-match':''}" data-round="${round}" data-idx="${idx}">`;
+
+      if (isFinal) {
+        html += `<div class="champ-wrap"><div class="col-label gold">Championship Match</div>`;
+      }
+
+      if (isFinal && winner) {
+        const cls = locked ? 'result-champ' : 'pick-champ';
+        html += `<div class="champ-slot ${cls}">🏆 ${f(winner)}${winner}</div>`;
+      } else if (!isFinal || !winner) {
+        for (const [pos,team] of [[0,t0],[1,t1]]) {
+          if (!team) {
+            html += `<button class="team-slot tbd" disabled>TBD</button>`;
+          } else {
+            let cls = '';
+            if (locked) {
+              cls = winner===team ? 'result' : 'eliminated';
+            } else if (winner===team) {
+              cls = 'picked';
+            } else if (winner && winner!==team) {
+              cls = 'eliminated';
+            } else {
+              cls = 'pickable';
+            }
+            html += `<button class="team-slot ${cls}"
+              data-round="${round}" data-idx="${idx}" data-team="${esc(team)}"
+              >${f(team)}${team}</button>`;
+          }
+        }
+      }
+
+      if (isFinal) html += `</div>`; // champ-wrap
+
+      html += `</div>`; // match
+    }
+
+    html += `</div></div>`; // b-col-inner, b-col
+
+    if (isFinal) {
+      // 3rd place
+      const tp0=getTeam('third',0,0), tp1=getTeam('third',0,1);
+      const tpW=ap['third_0']||'';
+      const tpLocked=isLocked('third',0);
+      html += `<div class="third-place"><div class="col-label third-label">3rd Place Match</div>
+        <div class="match third-match" data-round="third" data-idx="0">`;
+      for (const [pos,team] of [[0,tp0],[1,tp1]]) {
+        if (!team) {
+          html += `<button class="team-slot tbd" disabled>TBD</button>`;
+        } else {
+          let cls = '';
+          if (tpLocked) {
+            cls = tpW===team?'result':'eliminated';
+          } else if (tpW===team) {
+            cls = 'picked';
+          } else if (tpW && tpW!==team) {
+            cls = 'eliminated';
+          } else {
+            cls = 'pickable';
+          }
+          html += `<button class="team-slot ${cls}"
+            data-round="third" data-idx="0" data-team="${esc(team)}"
+            >${f(team)}${team}</button>`;
+        }
+      }
+      html += `</div></div>`;
+      html += `<div class="b-divider"></div>`;
+    }
+  }
+
+  bracket.innerHTML = html;
+  drawConnectors();
+
+  bracket.onclick = e => {
+    const btn = e.target.closest('.team-slot.pickable, .team-slot.picked');
+    if (!btn) return;
+    pick(btn.dataset.round, parseInt(btn.dataset.idx), btn.dataset.team);
+  };
+}
+
+function drawConnectors() {
+  const container = document.getElementById('bracket');
+  const svg = document.getElementById('bracketLines');
+  if (!container||!svg) return;
+  const w=container.scrollWidth, h=container.scrollHeight;
+  svg.setAttribute('width',w); svg.setAttribute('height',h);
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  const cr = container.getBoundingClientRect();
+  let paths='';
+  const ap = allPicks();
+  for (let r=0; r<ROUND_ORDER.length-1; r++) {
+    const round=ROUND_ORDER[r], nextRound=ROUND_ORDER[r+1];
+    container.querySelectorAll(`.match[data-round="${round}"]`).forEach(matchEl => {
+      const idx=parseInt(matchEl.dataset.idx);
+      const nextIdx=Math.floor(idx/2);
+      const nextEl=container.querySelector(`.match[data-round="${nextRound}"][data-idx="${nextIdx}"]`);
+      if (!nextEl) return;
+      const a=matchEl.getBoundingClientRect(), b=nextEl.getBoundingClientRect();
+      const aCx=a.left+a.width/2-cr.left, bCx=b.left+b.width/2-cr.left;
+      let exitX,entryX;
+      if (aCx<bCx) { exitX=a.right-cr.left; entryX=b.left-cr.left; }
+      else { exitX=a.left-cr.left; entryX=b.right-cr.left; }
+      const midX=(exitX+entryX)/2;
+      const ay=a.top+a.height/2-cr.top, by=b.top+b.height/2-cr.top;
+      // Gold if a winner is confirmed (either locked or picked) and has advanced
+      const winner=ap[`${round}_${idx}`];
+      const advanced = winner && matchEl.querySelector('.team-slot.result, .team-slot.picked');
+      const color = advanced ? '#c9a227' : '#dde3ea';
+      paths += `<path d="M${exitX},${ay} L${midX},${ay} L${midX},${by} L${entryX},${by}"
+        stroke="${color}" stroke-width="2" fill="none"/>`;
+    });
+  }
+  svg.querySelector('g').innerHTML=paths;
+}
+
+async function loadResults() {
+  try {
+    document.getElementById('statusBar').textContent = 'Loading official results…';
+    const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260628-20260720');
+    const json = await res.json();
+    const events = (json.events||[]).sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+    const fixtures=[];
+    events.forEach(ev=>{
+      const comp=ev.competitions?.[0];
+      if (!comp?.status?.type?.completed) return;
+      const comps=comp.competitors||[];
+      if (comps.length!==2) return;
+      const w=comps.find(c=>c.winner);
+      if (!w) return;
+      fixtures.push({ teams:comps.map(c=>canon(c.team.displayName)), winner:canon(w.team.displayName) });
+    });
+
+    // Cascading resolution: match fixtures to bracket slots
+    const resolved={};
+    const rounds=['r32','r16','qf','sf','third','final'];
+    let changed=true, guard=0;
+    while(changed && guard<6){
+      changed=false; guard++;
+      rounds.forEach(round=>{
+        for(let idx=0;idx<ROUND_COUNTS[round];idx++){
+          const key=`${round}_${idx}`;
+          if(resolved[key]) continue;
+          // get teams using currently resolved results
+          let t0,t1;
+          if(round==='r32'){ t0=(SETUP[idx]||['',''])[0]; t1=(SETUP[idx]||['',''])[1]; }
+          else if(round==='third'){
+            const w0=resolved['sf_0'], w1=resolved['sf_1'];
+            const s00=getTeamBase('sf',0,0),s01=getTeamBase('sf',0,1);
+            const s10=getTeamBase('sf',1,0),s11=getTeamBase('sf',1,1);
+            t0=w0?(w0===s00?s01:s00):''; t1=w1?(w1===s10?s11:s10):'';
+          } else {
+            const pr=PREV[round];
+            t0=resolved[`${pr}_${idx*2}`]||''; t1=resolved[`${pr}_${idx*2+1}`]||'';
+          }
+          if(!t0||!t1) continue;
+          const fix=fixtures.find(f=>f.teams.includes(t0)&&f.teams.includes(t1));
+          if(fix){ resolved[key]=fix.winner; changed=true; }
+        }
+      });
+    }
+    lockedResults=resolved;
+
+    const n=Object.keys(resolved).length;
+    const remaining=32-Object.keys(lockedResults).filter(k=>!k.startsWith('r16')&&!k.startsWith('qf')&&!k.startsWith('sf')&&!k.startsWith('final')&&!k.startsWith('third')).length;
+    document.getElementById('statusBar').textContent=`${n} official results locked in · pick the remaining matches`;
+    render();
+    setInterval(loadResults, 120000);
+  } catch(e) {
+    document.getElementById('statusBar').textContent='Could not load results — try refreshing';
+    render();
+  }
+}
+
+function getTeamBase(round,idx,pos){
+  if(round==='r32') return (SETUP[idx]||['',''])[pos]||'';
+  return lockedResults[`${PREV[round]}_${idx*2+pos}`]||'';
+}
+
+render();
+loadResults();
+
+window.parent?.postMessage({type:'wc2026-bracket-height',height:document.documentElement.scrollHeight},'*');
+new ResizeObserver(()=>window.parent?.postMessage({type:'wc2026-bracket-height',height:document.documentElement.scrollHeight},'*')).observe(document.body);
+</script>
+</body>
+</html>
