@@ -199,6 +199,21 @@ function doGet(e) {
   const rows = sheet.getRange(2, 1, lastRow - 1, numCols).getValues();
   const results = getResultsMap_();
   const advancers = getGroupAdvancers_();
+  const r32Setup = getR32Setup_();
+
+  // Build the set of teams already knocked out, so later-round picks for
+  // eliminated teams can be flagged as 'eliminated' rather than 'pending'.
+  const eliminatedTeams = new Set();
+  ['r32','r16','qf','sf'].forEach(round => {
+    for (let idx = 0; idx < ROUND_COUNTS[round]; idx++) {
+      const winner = results[`${round}_${idx}`];
+      if (!winner) continue;
+      const t0 = getTeamServer_(round, idx, 0, results, r32Setup);
+      const t1 = getTeamServer_(round, idx, 1, results, r32Setup);
+      const loser = winner === t0 ? t1 : t0;
+      if (loser) eliminatedTeams.add(loser);
+    }
+  });
 
   const participants = rows.filter(r => r[1]).map(r => {
     const p = { name: r[1], submitted: r[0] };
@@ -237,7 +252,14 @@ function doGet(e) {
         const pick = bracketPicks[key];
         if (!pick) continue;
         const actual = results[key];
-        const status = !actual ? 'pending' : (canonical_(pick) === actual ? 'correct' : 'wrong');
+        let status;
+        if (actual) {
+          status = canonical_(pick) === actual ? 'correct' : 'wrong';
+        } else if (eliminatedTeams.has(canonical_(pick))) {
+          status = 'eliminated';
+        } else {
+          status = 'pending';
+        }
         list.push({ team: pick, status });
       }
       p.picks[round] = list;
