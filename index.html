@@ -273,7 +273,7 @@ async function loadLeaderboard() {
     let html = `<div style="color:#64748b;font-size:12px;margin-bottom:12px;">${participants.length} player${participants.length!==1?'s':''} in the pool · click a name to see their picks</div>`;
     html += `<div style="overflow-x:auto;"><table class="std-table" style="min-width:780px;">
       <thead><tr>
-        <th style="text-align:left;width:1px;white-space:nowrap;padding-right:32px;">Name</th>
+        <th style="text-align:left;">Name</th>
         <th>Group Stage Total</th><th>R32</th><th>R16</th><th>QF</th><th>SF</th><th>3rd</th><th>Final</th>
         <th>Total</th><th style="color:#2f6690;">Max</th>
       </tr></thead><tbody>`;
@@ -286,7 +286,7 @@ async function loadLeaderboard() {
       const champFlag = champTeam ? (FLAGS[champTeam] || '') : '';
       const flagBadge = champFlag ? ` <span title="${champTeam}" style="font-size:14px;margin-left:4px;">${champFlag}</span>` : '';
       html += `<tr class="ldr-data-row" onclick="togglePickRow('${detailId}')">
-        <td style="text-align:left;white-space:nowrap;width:1px;padding-right:32px;">${rankLabel} <span class="chevron">▶</span> <strong>${p.name}</strong>${flagBadge}</td>
+        <td style="text-align:left;white-space:nowrap;">${rankLabel} <span class="chevron">▶</span> <strong>${p.name}</strong>${flagBadge}</td>
         <td>${p.groupPoints ?? 0}</td>
         <td>${p.r32Points ?? 0}</td>
         <td>${p.r16Points ?? 0}</td>
