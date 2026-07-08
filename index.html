@@ -275,7 +275,7 @@ async function loadLeaderboard() {
       <thead><tr>
         <th style="text-align:left;">Name</th>
         <th>Group Stage Total</th><th>R32</th><th>R16</th><th>QF</th><th>SF</th><th>3rd</th><th>Final</th>
-        <th>Total</th>
+        <th>Total</th><th style="color:#2f6690;">Max</th>
       </tr></thead><tbody>`;
     let displayRank = 1;
     participants.forEach((p, i) => {
@@ -295,9 +295,10 @@ async function loadLeaderboard() {
         <td>${p.thirdPoints ?? 0}</td>
         <td>${p.finalPoints ?? 0}</td>
         <td class="std-pts">${p.totalPoints ?? 0}</td>
+        <td style="color:#2f6690;font-weight:700;">${p.maxPossible ?? (p.totalPoints ?? 0)}</td>
       </tr>
       <tr class="ldr-detail-row" id="${detailId}">
-        <td colspan="9">${renderPickDetail(p, detailId)}</td>
+        <td colspan="10">${renderPickDetail(p, detailId)}</td>
       </tr>`;
     });
     html += `</tbody></table></div>`;

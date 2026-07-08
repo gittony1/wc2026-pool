@@ -241,6 +241,22 @@ function doGet(e) {
     p.bracketPoints = bracketPoints;
     p.totalPoints = groupPoints + bracketPoints;
 
+    // Max possible score: current score + points from every pick that is still
+    // alive (no result yet for that slot AND the picked team hasn't been eliminated).
+    let maxPossible = groupPoints + bracketPoints;
+    const ROUNDS_LIST_ALL = ['r32','r16','qf','sf','third','final'];
+    ROUNDS_LIST_ALL.forEach(round => {
+      for (let idx = 0; idx < ROUND_COUNTS[round]; idx++) {
+        const key = `${round}_${idx}`;
+        const pick = bracketPicks[key];
+        if (!pick) continue;              // no pick made for this slot
+        if (results[key]) continue;       // already decided — points already counted
+        if (eliminatedTeams.has(canonical_(pick))) continue; // team knocked out
+        maxPossible += ROUND_POINTS[round];
+      }
+    });
+    p.maxPossible = maxPossible;
+
     // Per-round pick arrays for the leaderboard expand view.
     // Each entry: { team, status } where status is 'correct'|'wrong'|'pending'.
     const ROUNDS_LIST = ['r32','r16','qf','sf','third','final'];
